@@ -22,19 +22,19 @@ function ChatHeader({ onBack }) {
   return (
     <div className="flex items-center bg-emerald-600 dark:bg-slate-800 h-16">
       <div className="flex-1 flex items-center gap-4 px-4">
-        <button 
+        <button
           onClick={onBack}
           className="lg:hidden text-white hover:bg-white/10 p-2 rounded-full transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        
+
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden">
-            <img 
-              src={selectedUser.profilePic || "/avatar.png"} 
+            <img
+              src={selectedUser.profilePic || "/avatar.png"}
               alt={selectedUser.fullName}
-              className="w-full h-full object-cover" 
+              className="w-full h-full object-cover"
             />
           </div>
 
@@ -47,9 +47,9 @@ function ChatHeader({ onBack }) {
         </div>
       </div>
 
-      <button className="p-2 text-white hover:bg-white/10 rounded-full transition-colors mr-2">
+      {/* <button className="p-2 text-white hover:bg-white/10 rounded-full transition-colors mr-2">
         <MoreVertical className="w-6 h-6" />
-      </button>
+      </button> */}
     </div>
   );
 }
