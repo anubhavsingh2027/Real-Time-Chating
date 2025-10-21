@@ -45,18 +45,18 @@ function MessageInput() {
   };
 
   return (
-    <div className="p-3 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+    <div className="p-4 border-t border-slate-700/50">
       {imagePreview && (
-        <div className="max-w-3xl mx-auto mb-3 flex items-center px-2">
+        <div className="max-w-3xl mx-auto mb-3 flex items-center">
           <div className="relative">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-slate-300 dark:border-slate-600"
+              className="w-20 h-20 object-cover rounded-lg border border-slate-700"
             />
             <button
               onClick={removeImage}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-slate-200 hover:bg-slate-700"
               type="button"
             >
               <XIcon className="w-4 h-4" />
@@ -65,17 +65,7 @@ function MessageInput() {
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex items-center space-x-2">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className={`flex-none p-3 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors ${
-            imagePreview ? "text-emerald-500" : "text-slate-500 dark:text-slate-400"
-          }`}
-        >
-          <ImageIcon className="w-6 h-6" />
-        </button>
-
+      <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex space-x-4">
         <input
           type="text"
           value={text}
@@ -83,8 +73,8 @@ function MessageInput() {
             setText(e.target.value);
             isSoundEnabled && playRandomKeyStrokeSound();
           }}
-          className="flex-1 bg-white dark:bg-slate-700 rounded-full py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-600"
-          placeholder="Type a message"
+          className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-lg py-2 px-4"
+          placeholder="Type your message..."
         />
 
         <input
@@ -96,11 +86,20 @@ function MessageInput() {
         />
 
         <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 transition-colors ${
+            imagePreview ? "text-cyan-500" : ""
+          }`}
+        >
+          <ImageIcon className="w-5 h-5" />
+        </button>
+        <button
           type="submit"
           disabled={!text.trim() && !imagePreview}
-          className="flex-none p-3 text-white rounded-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg px-4 py-2 font-medium hover:from-cyan-600 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <SendIcon className="w-6 h-6" />
+          <SendIcon className="w-5 h-5" />
         </button>
       </form>
     </div>
