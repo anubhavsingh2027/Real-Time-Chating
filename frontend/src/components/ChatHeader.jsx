@@ -1,10 +1,10 @@
-import { XIcon } from "lucide-react";
+import { XIcon, MenuIcon } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 
 function ChatHeader() {
-  const { selectedUser, setSelectedUser } = useChatStore();
+  const { selectedUser, setSelectedUser, toggleSidebar } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const isOnline = onlineUsers.includes(selectedUser._id);
 
@@ -25,6 +25,14 @@ function ChatHeader() {
    border-slate-700/50 max-h-[84px] px-6 flex-1"
     >
       <div className="flex items-center space-x-3">
+        {/* mobile menu button */}
+        <button
+          className="lg:hidden mr-2 text-slate-400 hover:text-slate-200"
+          onClick={() => toggleSidebar()}
+          aria-label="Open chats"
+        >
+          <MenuIcon className="w-5 h-5" />
+        </button>
         <div className={`avatar ${isOnline ? "online" : "offline"}`}>
           <div className="w-12 rounded-full">
             <img src={selectedUser.profilePic || "/avatar.png"} alt={selectedUser.fullName} />
@@ -37,7 +45,7 @@ function ChatHeader() {
         </div>
       </div>
 
-      <button onClick={() => setSelectedUser(null)}>
+      <button onClick={() => setSelectedUser(null)} className="hidden sm:inline">
         <XIcon className="w-5 h-5 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer" />
       </button>
     </div>
