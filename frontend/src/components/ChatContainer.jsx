@@ -6,7 +6,7 @@ import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 
-function ChatContainer() {
+function ChatContainer({ onBack }) {
   const {
     selectedUser,
     getMessagesByUserId,
@@ -33,21 +33,21 @@ function ChatContainer() {
   }, [messages]);
 
   return (
-    <>
-      <ChatHeader />
-      <div className="flex-1 px-6 overflow-y-auto py-8">
+    <div className="h-full flex flex-col">
+      <ChatHeader onBack={onBack} />
+      <div className="flex-1 px-3 sm:px-6 overflow-y-auto py-4 sm:py-8 bg-[#efeae2] dark:bg-slate-900">
         {messages.length > 0 && !isMessagesLoading ? (
-          <div className="max-w-3xl mx-auto space-y-6">
+          <div className="max-w-3xl mx-auto space-y-3">
             {messages.map((msg) => (
               <div
                 key={msg._id}
-                className={`chat ${msg.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+                className={`flex ${msg.senderId === authUser._id ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`chat-bubble relative ${
+                  className={`relative max-w-[75%] rounded-lg px-3 py-2 ${
                     msg.senderId === authUser._id
-                      ? "bg-cyan-600 text-white"
-                      : "bg-slate-800 text-slate-200"
+                      ? "bg-emerald-500 text-white rounded-tr-none"
+                      : "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none"
                   }`}
                 >
                   {msg.image && (
@@ -74,7 +74,7 @@ function ChatContainer() {
       </div>
 
       <MessageInput />
-    </>
+    </div>
   );
 }
 
