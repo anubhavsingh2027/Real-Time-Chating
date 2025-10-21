@@ -25,14 +25,14 @@ function ChatHeader({ onOpenSidebar }) {
    border-slate-700/50 max-h-[84px] px-4 sm:px-6 flex-1"
     >
       <div className="flex items-center space-x-3">
-        {/* mobile menu button - always show on mobile */}
+        {/* Back button on mobile */}
         <button
-          className="lg:hidden -ml-1 mr-2 p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 rounded-lg"
+          className="lg:hidden -ml-1 p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 rounded-lg"
           onClick={onOpenSidebar}
-          aria-label="Open chats menu"
+          aria-label="Back to chats"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <div className={`avatar ${isOnline ? "online" : "offline"}`}>
