@@ -9,8 +9,6 @@ export const useChatStore = create((set, get) => ({
   messages: [],
   activeTab: "chats",
   selectedUser: null,
-  // control mobile sidebar visibility (for small screens)
-  isSidebarOpen: false,
   isUsersLoading: false,
   isMessagesLoading: false,
   isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
@@ -22,8 +20,6 @@ export const useChatStore = create((set, get) => ({
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedUser: (selectedUser) => set({ selectedUser }),
-  setSidebarOpen: (value) => set({ isSidebarOpen: value }),
-  toggleSidebar: () => set({ isSidebarOpen: !get().isSidebarOpen }),
 
   getAllContacts: async () => {
     set({ isUsersLoading: true });

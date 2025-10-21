@@ -6,7 +6,7 @@ import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 
-function ChatContainer() {
+function ChatContainer({ onOpenSidebar }) {
   const {
     selectedUser,
     getMessagesByUserId,
@@ -34,8 +34,8 @@ function ChatContainer() {
 
   return (
     <>
-      <ChatHeader />
-      <div className="flex-1 px-4 sm:px-6 overflow-y-auto py-6">
+  <ChatHeader onOpenSidebar={onOpenSidebar} />
+  <div className="flex-1 px-4 sm:px-6 overflow-y-auto py-6">
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-6 px-2 sm:px-0">
             {messages.map((msg) => (

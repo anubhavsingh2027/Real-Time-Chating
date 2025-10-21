@@ -5,7 +5,7 @@ import { useChatStore } from "../store/useChatStore";
 
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
-function ProfileHeader() {
+function ProfileHeader({ onOpen }) {
   const { logout, authUser, updateProfile } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImg, setSelectedImg] = useState(null);
@@ -29,6 +29,18 @@ function ProfileHeader() {
   return (
     <div className="p-6 border-b border-slate-700/50">
       <div className="flex items-center justify-between">
+        {/* mobile open button */}
+        {onOpen && (
+          <button
+            className="lg:hidden mr-3 text-slate-400 hover:text-slate-200"
+            onClick={() => onOpen()}
+            aria-label="Open chats"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
         <div className="flex items-center gap-3">
           {/* AVATAR */}
           <div className="avatar online">
