@@ -22,21 +22,19 @@ function ChatHeader({ onOpenSidebar }) {
   return (
     <div
       className="flex justify-between items-center bg-slate-800/50 border-b
-   border-slate-700/50 max-h-[84px] px-6 flex-1"
+   border-slate-700/50 max-h-[84px] px-4 sm:px-6 flex-1"
     >
       <div className="flex items-center space-x-3">
-        {/* mobile menu button */}
-        {onOpenSidebar && (
-          <button
-            className="lg:hidden mr-2 text-slate-400 hover:text-slate-200"
-            onClick={() => onOpenSidebar()}
-            aria-label="Open chats"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        )}
+        {/* mobile menu button - always show on mobile */}
+        <button
+          className="lg:hidden -ml-1 mr-2 p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 rounded-lg"
+          onClick={onOpenSidebar}
+          aria-label="Open chats menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
         <div className={`avatar ${isOnline ? "online" : "offline"}`}>
           <div className="w-12 rounded-full">
             <img src={selectedUser.profilePic || "/avatar.png"} alt={selectedUser.fullName} />
