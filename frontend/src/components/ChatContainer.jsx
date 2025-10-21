@@ -6,7 +6,7 @@ import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 
-function ChatContainer() {
+function ChatContainer({ onBack }) {
   const {
     selectedUser,
     getMessagesByUserId,
@@ -34,27 +34,27 @@ function ChatContainer() {
 
   return (
     <>
-      <ChatHeader />
-      <div className="flex-1 px-6 overflow-y-auto py-8">
+      <ChatHeader onBack={onBack} />
+      <div className="flex-1 px-3 sm:px-6 overflow-y-auto py-4 sm:py-8 bg-[#efeae2] dark:bg-slate-900">
         {messages.length > 0 && !isMessagesLoading ? (
-          <div className="max-w-3xl mx-auto space-y-6">
+          <div className="max-w-3xl mx-auto space-y-3">
             {messages.map((msg) => (
               <div
                 key={msg._id}
-                className={`chat ${msg.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+                className={`flex ${msg.senderId === authUser._id ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`chat-bubble relative ${
+                  className={`relative max-w-[75%] rounded-lg px-3 py-2 ${
                     msg.senderId === authUser._id
-                      ? "bg-cyan-600 text-white"
-                      : "bg-slate-800 text-slate-200"
+                      ? "bg-emerald-500 text-white rounded-tr-none"
+                      : "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none"
                   }`}
                 >
                   {msg.image && (
-                    <img src={msg.image} alt="Shared" className="rounded-lg h-48 object-cover" />
+                    <img src={msg.image} alt="Shared" className="rounded-lg max-h-60 w-full object-cover mb-1" />
                   )}
-                  {msg.text && <p className="mt-2">{msg.text}</p>}
-                  <p className="text-xs mt-1 opacity-75 flex items-center gap-1">
+                  {msg.text && <p className="text-sm">{msg.text}</p>}
+                  <p className="text-[0.65rem] mt-1 opacity-75 flex items-center justify-end gap-1">
                     {new Date(msg.createdAt).toLocaleTimeString(undefined, {
                       hour: "2-digit",
                       minute: "2-digit",
