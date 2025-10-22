@@ -22,13 +22,15 @@ function MessageBubble({ message, isOwnMessage }) {
 
   // Handle mobile long press
   const handleTouchStart = (e) => {
+    e.preventDefault(); // Prevent default behavior
     longPressTimer.current = setTimeout(() => {
       setIsLongPress(true);
       setShowCopy(true);
     }, 500);
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e) => {
+    e.preventDefault(); // Prevent default behavior
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
     }
@@ -65,7 +67,7 @@ function MessageBubble({ message, isOwnMessage }) {
   return (
     <div 
       ref={bubbleRef}
-      className={`group relative max-w-[65%] sm:max-w-[60%] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
+      className={`group relative max-w-[70%] sm:max-w-[55%] md:max-w-[50%] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
@@ -98,27 +100,18 @@ function MessageBubble({ message, isOwnMessage }) {
 
         {/* Copy Button */}
         {showCopy && message.text && (
-          <div className="copy-button-area absolute top-1/2 -translate-y-1/2 z-10">
+          <div className="copy-button-area">
             <button
               onClick={handleCopyMessage}
-              className={`p-1.5 rounded-full bg-white/10 backdrop-blur 
-                hover:bg-white/20 transition-colors
-                ${isOwnMessage ? '-left-10' : '-right-10'} 
-                absolute flex items-center justify-center
-                shadow-lg`}
+              className={`absolute top-1/2 -translate-y-1/2 p-1.5 rounded-full 
+                bg-white/10 dark:bg-slate-800/50 backdrop-blur-sm
+                hover:bg-white/20 dark:hover:bg-slate-700/50 transition-colors 
+                ${isOwnMessage ? '-left-10' : '-right-10'}`}
               title="Copy message"
             >
-              <Copy className="w-3.5 h-3.5" />
+              <Copy className="w-4 h-4" />
             </button>
           </div>
-          <button
-            onClick={handleCopyMessage}
-            className={`absolute top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white/10 backdrop-blur-sm
-              hover:bg-white/20 transition-colors ${isOwnMessage ? '-left-10' : '-right-10'}`}
-            title="Copy message"
-          >
-            <Copy className="w-4 h-4" />
-          </button>
         )}
       </div>
     </div>
