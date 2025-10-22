@@ -56,7 +56,7 @@ function MessageBubble({
 
       // Add the event listener to the document
       document.addEventListener('click', handleClickOutside);
-      
+
       // Cleanup the event listener when the component unmounts or menu closes
       return () => {
         document.removeEventListener('click', handleClickOutside);
@@ -100,7 +100,7 @@ function MessageBubble({
       onTouchEnd={handleTouchEnd}
     >
       <div
-        className={`relative rounded-lg px-3 py-2
+        className={`relative rounded-lg px-3.5 py-2.5
           ${isOwnMessage
             ? 'bg-emerald-500 text-white rounded-tr-none'
             : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
@@ -116,7 +116,11 @@ function MessageBubble({
             className="rounded-lg max-h-60 w-full object-cover mb-1"
           />
         )}
-        {message.text && <p className="text-sm break-words">{message.text}</p>}
+        {message.text && (
+          <p className="text-[0.9375rem] leading-[1.4] break-words whitespace-pre-wrap tracking-wide font-normal">
+            {message.text}
+          </p>
+        )}
 
         {/* Footer: Time and Status */}
         <div className="flex items-center justify-end gap-1 mt-1">
