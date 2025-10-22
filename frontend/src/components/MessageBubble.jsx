@@ -97,15 +97,15 @@ function MessageBubble({
       case 'delivered':
         return (
           <div className="flex -space-x-1">
-            <Check className="w-3 h-3 text-slate-400" />
-            <Check className="w-3 h-3 text-slate-400" />
+            <Check className="w-3 h-3 text-slate-500" strokeWidth={2} />
+            <Check className="w-3 h-3 text-slate-500" strokeWidth={2} />
           </div>
         );
       case 'seen':
         return (
           <div className="flex -space-x-1">
-            <Check className="w-3 h-3 text-blue-500" />
-            <Check className="w-3 h-3 text-blue-500" />
+            <Check className="w-3 h-3 text-blue-600" strokeWidth={2.5} />
+            <Check className="w-3 h-3 text-blue-600" strokeWidth={2.5} />
           </div>
         );
       default:
@@ -124,7 +124,7 @@ function MessageBubble({
       <div
         className={`relative rounded-lg px-3.5 py-2.5
           ${isOwnMessage
-            ? 'bg-white dark:bg-slate-100 text-slate-900 shadow-md rounded-tr-none'
+            ? 'bg-emerald-500 text-white rounded-tr-none'
             : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
           }
           transition-all duration-200 ease-in-out
