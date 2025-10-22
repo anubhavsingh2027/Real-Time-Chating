@@ -76,12 +76,16 @@ export const useChatStore = create((set, get) => ({
 
     try {
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
-      set({ messages: messages.concat(res.data) });
+      // Replace optimistic message with actual message
+      const updatedMessages = messages.map(msg => 
+        msg._id === tempId ? res.data : msg
+      );
+      set({ messages: updatedMessages });
     } catch (error) {
       // remove optimistic message on failure
-      set({ messages: messages });
+      set({ messages: messages.filter(msg => msg._id !== tempId) });
       toast.error(error.response?.data?.message || "Image should be less than 10 MB. Please compress or upload a smaller image");
-      etTimeout(()=>{
+      setTimeout(()=>{
         window.location.href='/'
       },2000)
     }
@@ -92,17 +96,25 @@ export const useChatStore = create((set, get) => ({
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
+    
+    // First remove any existing listeners to prevent duplicates
+    socket.off("newMessage");
 
+    // Then add the new listener
     socket.on("newMessage", (newMessage) => {
       const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
 
       const currentMessages = get().messages;
+      
+      // Check if the message already exists to prevent duplicates
+      const messageExists = currentMessages.some(msg => msg._id === newMessage._id);
+      if (messageExists) return;
+
       set({ messages: [...currentMessages, newMessage] });
 
       if (isSoundEnabled) {
         const notificationSound = new Audio("/sounds/notification.mp3");
-
         notificationSound.currentTime = 0; // reset to start
         notificationSound.play().catch((e) => {});
       }
