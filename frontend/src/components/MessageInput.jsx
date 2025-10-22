@@ -8,12 +8,10 @@ function MessageInput() {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
-  const [typingTimeout, setTypingTimeout] = useState(null);
 
   const fileInputRef = useRef(null);
 
-  const { sendMessage, isSoundEnabled, selectedUser } = useChatStore();
-  const { socket } = useAuthStore();
+  const { sendMessage, isSoundEnabled } = useChatStore();
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -83,22 +81,7 @@ function MessageInput() {
           value={text}
           onChange={(e) => {
             setText(e.target.value);
-            if (isSoundEnabled) playRandomKeyStrokeSound();
-            
-            // Handle typing indicator
-            if (socket) {
-              socket.emit('typing', { receiverId: selectedUser._id, isTyping: true });
-              
-              // Clear previous timeout
-              if (typingTimeout) clearTimeout(typingTimeout);
-              
-              // Set new timeout
-              const newTimeout = setTimeout(() => {
-                socket.emit('typing', { receiverId: selectedUser._id, isTyping: false });
-              }, 1000);
-              
-              setTypingTimeout(newTimeout);
-            }
+            isSoundEnabled && playRandomKeyStrokeSound();
           }}
           className="flex-1 bg-white dark:bg-slate-700 rounded-full py-3 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-600"
           placeholder="Type a message"

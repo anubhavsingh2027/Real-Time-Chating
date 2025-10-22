@@ -6,7 +6,6 @@ import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 import MessageBubble from "./MessageBubble";
-import TypingIndicator from "./TypingIndicator";
 
 function ChatContainer({ onBack }) {
   const {
@@ -16,9 +15,6 @@ function ChatContainer({ onBack }) {
     isMessagesLoading,
     subscribeToMessages,
     unsubscribeFromMessages,
-    isTyping,
-    messageStatuses,
-    deleteMessage,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
@@ -26,11 +22,9 @@ function ChatContainer({ onBack }) {
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
     subscribeToMessages();
-    
+
     // clean up
-    return () => {
-      unsubscribeFromMessages();
-    };
+    return () => unsubscribeFromMessages();
   }, [selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
@@ -50,15 +44,8 @@ function ChatContainer({ onBack }) {
                 key={msg._id}
                 message={msg}
                 isOwnMessage={msg.senderId === authUser._id}
-                messageStatus={msg.isOptimistic ? 'sending' : messageStatuses[msg._id] || 'sent'}
-                onDelete={(messageId) => deleteMessage(messageId)}
               />
             ))}
-            {isTyping && (
-              <div className="flex items-start">
-                <TypingIndicator />
-              </div>
-            )}
             {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>
