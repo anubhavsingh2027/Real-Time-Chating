@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 function MessageBubble({ message, isOwnMessage }) {
   const [showCopy, setShowCopy] = useState(false);
   const [isLongPress, setIsLongPress] = useState(false);
+  const [contextMenuPos, setContextMenuPos] = useState(null);
   const longPressTimer = useRef(null);
   const bubbleRef = useRef(null);
 
@@ -36,20 +37,31 @@ function MessageBubble({ message, isOwnMessage }) {
     }
   };
 
-  // Handle clicking outside to hide copy button on mobile
+  // Handle clicking outside to hide copy button and context menu
   useEffect(() => {
-    if (isLongPress) {
+    if (isLongPress || contextMenuPos) {
       const handleClickOutside = (e) => {
         if (bubbleRef.current && !bubbleRef.current.contains(e.target)) {
           setShowCopy(false);
           setIsLongPress(false);
+          setContextMenuPos(null);
         }
       };
 
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [isLongPress]);
+  }, [isLongPress, contextMenuPos]);
+
+  // Handle context menu (right click)
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    const rect = bubbleRef.current.getBoundingClientRect();
+    setContextMenuPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
 
   const handleCopyMessage = async () => {
     try {
@@ -72,6 +84,7 @@ function MessageBubble({ message, isOwnMessage }) {
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onContextMenu={handleContextMenu}
     >
       <div
         className={`relative rounded-lg px-3 py-2 ${
@@ -98,8 +111,8 @@ function MessageBubble({ message, isOwnMessage }) {
           </span>
         </div>
 
-        {/* Copy Button */}
-        {showCopy && message.text && (
+        {/* Hover Copy Button */}
+        {showCopy && !contextMenuPos && message.text && (
           <div className="copy-button-area">
             <button
               onClick={handleCopyMessage}
@@ -110,6 +123,26 @@ function MessageBubble({ message, isOwnMessage }) {
               title="Copy message"
             >
               <Copy className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Context Menu (Right Click) */}
+        {contextMenuPos && message.text && (
+          <div 
+            className="fixed z-50 bg-white dark:bg-slate-800 rounded-lg shadow-lg py-1 min-w-[120px]"
+            style={{
+              left: `${contextMenuPos.x}px`,
+              top: `${contextMenuPos.y}px`,
+            }}
+          >
+            <button
+              onClick={handleCopyMessage}
+              className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 
+                hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              <Copy className="w-4 h-4" />
+              Copy
             </button>
           </div>
         )}
