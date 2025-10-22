@@ -7,6 +7,8 @@ export const useChatStore = create((set, get) => ({
   allContacts: [],
   chats: [],
   messages: [],
+  messageStatuses: {}, // tracks status of each message
+  typingUsers: {}, // tracks who is typing in each chat
   activeTab: "chats",
   selectedUser: null,
   isUsersLoading: false,
