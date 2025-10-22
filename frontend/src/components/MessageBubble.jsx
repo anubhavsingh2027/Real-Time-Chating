@@ -90,22 +90,22 @@ function MessageBubble({
     switch (messageStatus) {
       case 'sending':
         return (
-          <div className="animate-spin w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full" />
+          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
         );
       case 'sent':
-        return <Check className="w-3 h-3 text-slate-400" />;
+        return <Check className="w-4 h-4 text-white" strokeWidth={2} />;
       case 'delivered':
         return (
           <div className="flex -space-x-1">
-            <Check className="w-3 h-3 text-slate-500" strokeWidth={2} />
-            <Check className="w-3 h-3 text-slate-500" strokeWidth={2} />
+            <Check className="w-4 h-4 text-white" strokeWidth={2} />
+            <Check className="w-4 h-4 text-white" strokeWidth={2} />
           </div>
         );
       case 'seen':
         return (
           <div className="flex -space-x-1">
-            <Check className="w-3 h-3 text-blue-600" strokeWidth={2.5} />
-            <Check className="w-3 h-3 text-blue-600" strokeWidth={2.5} />
+            <Check className="w-4 h-4 text-sky-400" strokeWidth={2.5} />
+            <Check className="w-4 h-4 text-sky-400" strokeWidth={2.5} />
           </div>
         );
       default:
@@ -155,7 +155,7 @@ function MessageBubble({
             })}
           </span>
           {isOwnMessage && (
-            <div className="transition-opacity duration-200">
+            <div className="flex items-center transition-opacity duration-200">
               {getStatusIcon()}
             </div>
           )}
