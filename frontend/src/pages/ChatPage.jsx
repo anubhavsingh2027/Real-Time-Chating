@@ -37,7 +37,11 @@ function ChatPage() {
             <div className="bg-emerald-600 dark:bg-slate-800 px-4 py-4 flex items-center gap-4">
               <div className="flex items-center gap-3 flex-1">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
-
+                <img
+                  src="/icon.png"
+                  alt="real time chatting"
+                  className="w-full h-full object-cover"
+                  />
                 </div>
                 <h1 className="text-xl font-medium text-white">Real Time Chating</h1>
               </div>

@@ -80,7 +80,7 @@ export const useChatStore = create((set, get) => ({
 
       // Update messages, replacing optimistic with actual
       set(state => ({
-        messages: state.messages.map(msg => 
+        messages: state.messages.map(msg =>
           msg._id === tempId ? actualMessage : msg
         )
       }));
@@ -97,7 +97,7 @@ export const useChatStore = create((set, get) => ({
       set(state => ({
         messages: state.messages.filter(msg => msg._id !== tempId)
       }));
-      
+
       const errorMsg = error.response?.data?.message || "Error sending message. Please try again.";
       toast.error(errorMsg);
 
@@ -115,7 +115,7 @@ export const useChatStore = create((set, get) => ({
 
     const socket = useAuthStore.getState().socket;
     if (!socket) return;
-    
+
     // Remove any existing listeners
     socket.off("newMessage");
 
@@ -123,18 +123,18 @@ export const useChatStore = create((set, get) => ({
     socket.on("newMessage", (data) => {
       const newMessage = data.message || data;
       const { authUser } = useAuthStore.getState();
-      
+
       // Only process messages relevant to the current chat
-      const isRelevantMessage = 
+      const isRelevantMessage =
         (newMessage.senderId === selectedUser._id && newMessage.receiverId === authUser._id) ||
         (newMessage.senderId === authUser._id && newMessage.receiverId === selectedUser._id);
-      
+
       if (!isRelevantMessage) return;
 
       set(state => {
         // Check for duplicates
-        const messageExists = state.messages.some(msg => 
-          msg._id === newMessage._id || 
+        const messageExists = state.messages.some(msg =>
+          msg._id === newMessage._id ||
           (msg.isOptimistic && msg.text === newMessage.text && msg.createdAt === newMessage.createdAt)
         );
 
