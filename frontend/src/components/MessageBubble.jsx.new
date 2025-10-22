@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Copy, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -11,6 +11,7 @@ function MessageBubble({
   const [isLongPress, setIsLongPress] = useState(false);
   const longPressTimer = useRef(null);
   const bubbleRef = useRef(null);
+  const menuRef = useRef(null);
 
   // Handle message copy
   const handleCopyMessage = async () => {
@@ -44,15 +45,24 @@ function MessageBubble({
     }
   };
 
-  // Handle clicking outside to dismiss actions
-  const handleClickOutside = (e) => {
-    if (bubbleRef.current && !bubbleRef.current.contains(e.target)) {
-      setShowActions(false);
-      setIsLongPress(false);
-    }
-  };
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (showActions || isLongPress) {
+      const handleClickOutside = (e) => {
+        if (bubbleRef.current && 
+            !bubbleRef.current.contains(e.target) && 
+            !menuRef.current?.contains(e.target)) {
+          setShowActions(false);
+          setIsLongPress(false);
+        }
+      };
 
-  // Get status icon based on message state
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showActions, isLongPress]);
+
+  // Get message status icon
   const getStatusIcon = () => {
     switch (messageStatus) {
       case 'sending':
@@ -86,29 +96,30 @@ function MessageBubble({
       className={`group relative max-w-[60%] sm:max-w-[50%] md:max-w-[45%] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      onClick={handleClickOutside}
     >
       <div
-        className={`relative rounded-lg px-3 py-2 
-          ${isOwnMessage
+        className={`relative rounded-lg px-2.5 py-1.5 ${
+          isOwnMessage
             ? 'bg-emerald-500 text-white rounded-tr-none'
             : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
-          }
-          transition-all duration-200 ease-in-out
-        `}
+        }`}
       >
         {/* Message Content */}
-        {message.image && (
-          <img 
-            src={message.image} 
-            alt="Shared" 
-            className="rounded-lg max-h-60 w-full object-cover mb-1" 
-          />
-        )}
-        {message.text && <p className="text-sm break-words">{message.text}</p>}
+        <div className="space-y-1">
+          {message.image && (
+            <img 
+              src={message.image} 
+              alt="Shared" 
+              className="rounded-lg max-h-60 w-full object-cover" 
+            />
+          )}
+          {message.text && (
+            <p className="text-[13px] leading-5 break-words whitespace-pre-wrap">{message.text}</p>
+          )}
+        </div>
 
         {/* Footer: Time and Status */}
-        <div className="flex items-center justify-end gap-1 mt-1">
+        <div className="flex items-center justify-end gap-1 mt-1 min-h-[16px]">
           <span className="text-[0.65rem] opacity-75">
             {new Date(message.createdAt).toLocaleTimeString(undefined, {
               hour: '2-digit',
@@ -121,41 +132,42 @@ function MessageBubble({
             </div>
           )}
         </div>
-
-        {/* Down Arrow Button */}
-        <button
-          onClick={handleToggleMenu}
-          className={`absolute ${isOwnMessage ? '-left-7' : '-right-7'} top-1/2 -translate-y-1/2
-            opacity-0 group-hover:opacity-100 transition-opacity duration-200
-            p-1.5 rounded-full bg-white/10 dark:bg-slate-800/50 backdrop-blur-sm
-            hover:bg-slate-200 dark:hover:bg-slate-700`}
-          title="Message options"
-        >
-          <ChevronDown className="w-4 h-4" />
-        </button>
-
-        {/* Actions Menu */}
-        {showActions && message.text && (
-          <div 
-            className={`absolute z-50 ${
-              isLongPress
-                ? `top-1/2 -translate-y-1/2 ${isOwnMessage ? '-left-28' : '-right-28'}`
-                : `${isOwnMessage ? 'left-0' : 'right-0'} -top-2 ${isOwnMessage ? '-translate-x-full' : 'translate-x-full'}`
-            }`}
-          >
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg py-1 w-28">
-              <button
-                onClick={handleCopyMessage}
-                className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                  hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-              >
-                <Copy className="w-4 h-4" />
-                Copy
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Down Arrow Button */}
+      <button
+        onClick={handleToggleMenu}
+        className={`absolute ${isOwnMessage ? '-left-7' : '-right-7'} top-1/2 -translate-y-1/2
+          opacity-0 group-hover:opacity-100 transition-opacity duration-200
+          p-1.5 rounded-full bg-white dark:bg-slate-700 shadow-sm
+          hover:bg-slate-100 dark:hover:bg-slate-600`}
+        title="Message options"
+      >
+        <ChevronDown className="w-3.5 h-3.5" />
+      </button>
+
+      {/* Actions Menu */}
+      {showActions && message.text && (
+        <div 
+          ref={menuRef}
+          className={`absolute z-50 ${
+            isLongPress
+              ? `top-1/2 -translate-y-1/2 ${isOwnMessage ? '-left-28' : '-right-28'}`
+              : `${isOwnMessage ? 'left-0' : 'right-0'} -top-1 ${isOwnMessage ? '-translate-x-[calc(100%+4px)]' : 'translate-x-[calc(100%+4px)]'}`
+          }`}
+        >
+          <div className="bg-white dark:bg-slate-700 rounded-lg shadow-lg py-1 w-24">
+            <button
+              onClick={handleCopyMessage}
+              className="w-full px-3 py-1.5 text-sm text-left flex items-center gap-2
+                hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Copy
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
