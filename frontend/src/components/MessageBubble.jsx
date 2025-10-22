@@ -124,7 +124,7 @@ function MessageBubble({
       <div
         className={`relative rounded-lg px-3.5 py-2.5
           ${isOwnMessage
-            ? 'bg-emerald-500 text-white rounded-tr-none'
+            ? 'bg-white dark:bg-slate-100 text-slate-900 shadow-md rounded-tr-none'
             : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
           }
           transition-all duration-200 ease-in-out
