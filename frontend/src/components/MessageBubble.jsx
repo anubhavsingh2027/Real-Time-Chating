@@ -55,12 +55,12 @@ function MessageBubble({
       case 'seen':
         return (
           <div className="flex -space-x-1">
-            <Check className="w-3 h-3 text-emerald-500" />
-            <Check className="w-3 h-3 text-emerald-500" />
+            <Check className="w-3 h-3 text-blue-500" />
+            <Check className="w-3 h-3 text-blue-500" />
           </div>
         );
       default:
-        return null;
+        return <Check className="w-3 h-3 text-slate-400" />;
     }
   };
 

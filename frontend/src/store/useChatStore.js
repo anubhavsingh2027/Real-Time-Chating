@@ -120,6 +120,31 @@ export const useChatStore = create((set, get) => ({
 
     // Remove any existing listeners
     socket.off("newMessage");
+    socket.off("messageStatus");
+    socket.off("messageDeleted");
+    socket.off("userTyping");
+
+    // Listen for message status updates
+    socket.on("messageStatus", ({ messageId, status }) => {
+      get().updateMessageStatus(messageId, status);
+    });
+
+    // Listen for message deletions
+    socket.on("messageDeleted", ({ messageId }) => {
+      set(state => ({
+        messages: state.messages.filter(msg => msg._id !== messageId)
+      }));
+    });
+
+    // Listen for typing indicators
+    socket.on("userTyping", ({ userId, isTyping }) => {
+      set(state => ({
+        typingUsers: {
+          ...state.typingUsers,
+          [userId]: isTyping
+        }
+      }));
+    });
 
     // Add new message listener
     socket.on("newMessage", (data) => {
@@ -158,6 +183,43 @@ export const useChatStore = create((set, get) => ({
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
-    socket.off("newMessage");
+    if (socket) {
+      socket.off("newMessage");
+      socket.off("messageStatus");
+      socket.off("messageDeleted");
+      socket.off("userTyping");
+    }
   },
+
+  deleteMessage: async (messageId) => {
+    try {
+      await axiosInstance.delete(`/messages/${messageId}`);
+      
+      set(state => ({
+        messages: state.messages.filter(msg => msg._id !== messageId)
+      }));
+
+      // Emit socket event to notify other user
+      const socket = useAuthStore.getState().socket;
+      if (socket) {
+        socket.emit('messageDeleted', {
+          messageId,
+          receiverId: get().selectedUser._id
+        });
+      }
+
+      toast.success('Message deleted');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete message');
+    }
+  },
+
+  updateMessageStatus: (messageId, status) => {
+    set(state => ({
+      messageStatuses: {
+        ...state.messageStatuses,
+        [messageId]: status
+      }
+    }));
+  }
 }));
