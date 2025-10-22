@@ -7,6 +7,7 @@ export const useChatStore = create((set, get) => ({
   allContacts: [],
   chats: [],
   messages: [],
+  messageStatuses: {}, // tracks status of each message
   activeTab: "chats",
   selectedUser: null,
   isUsersLoading: false,
@@ -109,6 +110,15 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  updateMessageStatus: (messageId, status) => {
+    set(state => ({
+      messageStatuses: {
+        ...state.messageStatuses,
+        [messageId]: status
+      }
+    }));
+  },
+
   subscribeToMessages: () => {
     const { selectedUser, isSoundEnabled } = get();
     if (!selectedUser) return;
@@ -120,6 +130,12 @@ export const useChatStore = create((set, get) => ({
     socket.off("newMessage");
 
     // Add new message listener
+    // Listen for message status updates
+    socket.on("messageStatus", ({ messageId, status }) => {
+      get().updateMessageStatus(messageId, status);
+    });
+
+    // Listen for new messages
     socket.on("newMessage", (data) => {
       const newMessage = data.message || data;
       const { authUser } = useAuthStore.getState();
@@ -157,5 +173,6 @@ export const useChatStore = create((set, get) => ({
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+    socket.off("messageStatus");
   },
 }));

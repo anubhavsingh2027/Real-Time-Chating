@@ -39,7 +39,7 @@ function ChatPage() {
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                 <img
                   src="/icon.png"
-                  alt="real time chatting"
+                  alt="Website logo"
                   className="w-full h-full object-cover"
                   />
                 </div>
