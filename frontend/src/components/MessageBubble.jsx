@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Copy, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLayoutEffect } from 'react';
 
 function MessageBubble({
   message,
@@ -11,6 +12,26 @@ function MessageBubble({
   const [isLongPress, setIsLongPress] = useState(false);
   const longPressTimer = useRef(null);
   const bubbleRef = useRef(null);
+  const messageTextRef = useRef(null);
+  const [dynamicWidth, setDynamicWidth] = useState('fit-content');
+
+  // Calculate message width
+  useLayoutEffect(() => {
+    if (messageTextRef.current && bubbleRef.current && message.text) {
+      const containerWidth = bubbleRef.current.parentElement.offsetWidth;
+      const textWidth = messageTextRef.current.offsetWidth;
+      const widthPercentage = (textWidth / containerWidth) * 100;
+
+      // If text takes up more than 30% of container, cap at 30%
+      // Otherwise, let it be its natural width
+      if (widthPercentage > 30) {
+        setDynamicWidth('30%');
+      } else {
+        // Add a small buffer to prevent text wrapping
+        setDynamicWidth(`${Math.min(widthPercentage + 2, 30)}%`);
+      }
+    }
+  }, [message.text]);
 
   // Handle message copy
   const handleCopyMessage = async () => {
@@ -95,7 +116,8 @@ function MessageBubble({
   return (
     <div
       ref={bubbleRef}
-      className={`group relative max-w-[60%] sm:max-w-[50%] md:max-w-[45%] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
+      style={{ width: message.text ? dynamicWidth : 'auto' }}
+      className={`group relative min-w-[120px] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -117,9 +139,11 @@ function MessageBubble({
           />
         )}
         {message.text && (
-          <p className="text-[0.9375rem] leading-[1.4] break-words whitespace-pre-wrap tracking-wide font-normal">
-            {message.text}
-          </p>
+          <div ref={messageTextRef} className="inline-block max-w-full">
+            <p className="text-[0.9375rem] leading-[1.4] break-words whitespace-pre-wrap tracking-wide font-normal">
+              {message.text}
+            </p>
+          </div>
         )}
 
         {/* Footer: Time and Status */}
