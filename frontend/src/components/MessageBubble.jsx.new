@@ -111,14 +111,6 @@ function MessageBubble({ message, isOwnMessage }) {
               <Copy className="w-3.5 h-3.5" />
             </button>
           </div>
-          <button
-            onClick={handleCopyMessage}
-            className={`absolute top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white/10 backdrop-blur-sm
-              hover:bg-white/20 transition-colors ${isOwnMessage ? '-left-10' : '-right-10'}`}
-            title="Copy message"
-          >
-            <Copy className="w-4 h-4" />
-          </button>
         )}
       </div>
     </div>
