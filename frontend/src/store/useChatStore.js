@@ -58,10 +58,9 @@ export const useChatStore = create((set, get) => ({
 
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
-    const { authUser } = useAuthStore.getState();
+    const { authUser, socket } = useAuthStore.getState();
 
     const tempId = `temp-${Date.now()}`;
-
     const optimisticMessage = {
       _id: tempId,
       senderId: authUser._id,
@@ -69,25 +68,44 @@ export const useChatStore = create((set, get) => ({
       text: messageData.text,
       image: messageData.image,
       createdAt: new Date().toISOString(),
-      isOptimistic: true, // flag to identify optimistic messages (optional)
+      isOptimistic: true,
     };
-    // immidetaly update the ui by adding the message
+
+    // Update UI immediately
     set({ messages: [...messages, optimisticMessage] });
 
     try {
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
-      // Replace optimistic message with actual message
-      const updatedMessages = messages.map(msg => 
-        msg._id === tempId ? res.data : msg
-      );
-      set({ messages: updatedMessages });
+      const actualMessage = res.data;
+
+      // Update messages, replacing optimistic with actual
+      set(state => ({
+        messages: state.messages.map(msg => 
+          msg._id === tempId ? actualMessage : msg
+        )
+      }));
+
+      // Emit the message through socket for real-time update
+      if (socket) {
+        socket.emit('newMessage', {
+          message: actualMessage,
+          receiverId: selectedUser._id
+        });
+      }
     } catch (error) {
-      // remove optimistic message on failure
-      set({ messages: messages.filter(msg => msg._id !== tempId) });
-      toast.error(error.response?.data?.message || "Image should be less than 10 MB. Please compress or upload a smaller image");
-      setTimeout(()=>{
-        window.location.href='/'
-      },2000)
+      // Remove optimistic message on failure
+      set(state => ({
+        messages: state.messages.filter(msg => msg._id !== tempId)
+      }));
+      
+      const errorMsg = error.response?.data?.message || "Error sending message. Please try again.";
+      toast.error(errorMsg);
+
+      if (errorMsg.includes("10 MB")) {
+        setTimeout(() => {
+          window.location.href='/'
+        }, 2000);
+      }
     }
   },
 
@@ -96,28 +114,43 @@ export const useChatStore = create((set, get) => ({
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
     
-    // First remove any existing listeners to prevent duplicates
+    // Remove any existing listeners
     socket.off("newMessage");
 
-    // Then add the new listener
-    socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
-
-      const currentMessages = get().messages;
+    // Add new message listener
+    socket.on("newMessage", (data) => {
+      const newMessage = data.message || data;
+      const { authUser } = useAuthStore.getState();
       
-      // Check if the message already exists to prevent duplicates
-      const messageExists = currentMessages.some(msg => msg._id === newMessage._id);
-      if (messageExists) return;
+      // Only process messages relevant to the current chat
+      const isRelevantMessage = 
+        (newMessage.senderId === selectedUser._id && newMessage.receiverId === authUser._id) ||
+        (newMessage.senderId === authUser._id && newMessage.receiverId === selectedUser._id);
+      
+      if (!isRelevantMessage) return;
 
-      set({ messages: [...currentMessages, newMessage] });
+      set(state => {
+        // Check for duplicates
+        const messageExists = state.messages.some(msg => 
+          msg._id === newMessage._id || 
+          (msg.isOptimistic && msg.text === newMessage.text && msg.createdAt === newMessage.createdAt)
+        );
 
-      if (isSoundEnabled) {
-        const notificationSound = new Audio("/sounds/notification.mp3");
-        notificationSound.currentTime = 0; // reset to start
-        notificationSound.play().catch((e) => {});
-      }
+        if (messageExists) return state;
+
+        // Play sound for incoming messages from other users
+        if (isSoundEnabled && newMessage.senderId === selectedUser._id) {
+          const notificationSound = new Audio("/sounds/notification.mp3");
+          notificationSound.currentTime = 0;
+          notificationSound.play().catch(() => {});
+        }
+
+        return {
+          messages: [...state.messages, newMessage]
+        };
+      });
     });
   },
 
