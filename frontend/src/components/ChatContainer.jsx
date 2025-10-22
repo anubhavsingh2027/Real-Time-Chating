@@ -46,8 +46,8 @@ function ChatContainer({ onBack }) {
                 message={msg}
                 isOwnMessage={msg.senderId === authUser._id}
                 messageStatus={
-                  msg.isOptimistic 
-                    ? 'sending' 
+                  msg.isOptimistic
+                    ? 'sending'
                     : messageStatuses[msg._id] || 'sent'
                 }
               />

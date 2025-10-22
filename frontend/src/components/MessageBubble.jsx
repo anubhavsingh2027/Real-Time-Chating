@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Copy, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-function MessageBubble({ 
-  message, 
+function MessageBubble({
+  message,
   isOwnMessage,
   messageStatus = 'sent' // 'sending', 'sent', 'delivered', 'seen'
 }) {
@@ -44,13 +44,25 @@ function MessageBubble({
     }
   };
 
-  // Handle clicking outside to dismiss actions
-  const handleClickOutside = (e) => {
-    if (bubbleRef.current && !bubbleRef.current.contains(e.target)) {
-      setShowActions(false);
-      setIsLongPress(false);
+  // Use effect to handle clicking outside
+  useEffect(() => {
+    if (showActions || isLongPress) {
+      const handleClickOutside = (e) => {
+        if (bubbleRef.current && !bubbleRef.current.contains(e.target)) {
+          setShowActions(false);
+          setIsLongPress(false);
+        }
+      };
+
+      // Add the event listener to the document
+      document.addEventListener('click', handleClickOutside);
+      
+      // Cleanup the event listener when the component unmounts or menu closes
+      return () => {
+        document.removeEventListener('click', handleClickOutside);
+      };
     }
-  };
+  }, [showActions, isLongPress]);
 
   // Get status icon based on message state
   const getStatusIcon = () => {
@@ -81,15 +93,14 @@ function MessageBubble({
   };
 
   return (
-    <div 
+    <div
       ref={bubbleRef}
       className={`group relative max-w-[60%] sm:max-w-[50%] md:max-w-[45%] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      onClick={handleClickOutside}
     >
       <div
-        className={`relative rounded-lg px-3 py-2 
+        className={`relative rounded-lg px-3 py-2
           ${isOwnMessage
             ? 'bg-emerald-500 text-white rounded-tr-none'
             : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
@@ -99,10 +110,10 @@ function MessageBubble({
       >
         {/* Message Content */}
         {message.image && (
-          <img 
-            src={message.image} 
-            alt="Shared" 
-            className="rounded-lg max-h-60 w-full object-cover mb-1" 
+          <img
+            src={message.image}
+            alt="Shared"
+            className="rounded-lg max-h-60 w-full object-cover mb-1"
           />
         )}
         {message.text && <p className="text-sm break-words">{message.text}</p>}
@@ -136,7 +147,7 @@ function MessageBubble({
 
         {/* Actions Menu */}
         {showActions && message.text && (
-          <div 
+          <div
             className={`absolute z-50 ${
               isLongPress
                 ? `top-1/2 -translate-y-1/2 ${isOwnMessage ? '-left-28' : '-right-28'}`

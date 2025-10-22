@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Copy, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-function MessageBubble({ 
-  message, 
+function MessageBubble({
+  message,
   isOwnMessage,
   messageStatus = 'sent' // 'sending', 'sent', 'delivered', 'seen'
 }) {
@@ -49,8 +49,8 @@ function MessageBubble({
   useEffect(() => {
     if (showActions || isLongPress) {
       const handleClickOutside = (e) => {
-        if (bubbleRef.current && 
-            !bubbleRef.current.contains(e.target) && 
+        if (bubbleRef.current &&
+            !bubbleRef.current.contains(e.target) &&
             !menuRef.current?.contains(e.target)) {
           setShowActions(false);
           setIsLongPress(false);
@@ -91,7 +91,7 @@ function MessageBubble({
   };
 
   return (
-    <div 
+    <div
       ref={bubbleRef}
       className={`group relative max-w-[60%] sm:max-w-[50%] md:max-w-[45%] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
       onTouchStart={handleTouchStart}
@@ -107,10 +107,10 @@ function MessageBubble({
         {/* Message Content */}
         <div className="space-y-1">
           {message.image && (
-            <img 
-              src={message.image} 
-              alt="Shared" 
-              className="rounded-lg max-h-60 w-full object-cover" 
+            <img
+              src={message.image}
+              alt="Shared"
+              className="rounded-lg max-h-60 w-full object-cover"
             />
           )}
           {message.text && (
@@ -148,7 +148,7 @@ function MessageBubble({
 
       {/* Actions Menu */}
       {showActions && message.text && (
-        <div 
+        <div
           ref={menuRef}
           className={`absolute z-50 ${
             isLongPress
