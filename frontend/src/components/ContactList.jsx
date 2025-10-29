@@ -1,21 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
+import SearchInput from "./SearchInput";
 
 function ContactList() {
   const { getAllContacts, allContacts, setSelectedUser, isUsersLoading } = useChatStore();
   const { onlineUsers } = useAuthStore();
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     getAllContacts();
   }, [getAllContacts]);
 
+  const filteredContacts = allContacts.filter(contact =>
+    contact.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (isUsersLoading) return <UsersLoadingSkeleton />;
 
   return (
     <>
-      {allContacts.map((contact) => (
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search contacts..."
+      />
+      {filteredContacts.length === 0 ? (
+        <div className="px-4">
+          <p className="text-slate-400 text-center">No contacts found</p>
+        </div>
+      ) : (
+        filteredContacts.map((contact) => (
         <div
           key={contact._id}
           className="bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
@@ -30,7 +46,8 @@ function ContactList() {
             <h4 className="text-slate-200 font-medium">{contact.fullName}</h4>
           </div>
         </div>
-      ))}
+        ))
+      )}
     </>
   );
 }
