@@ -11,13 +11,13 @@ export const generateToken = (userId, res) => {
     expiresIn: "7d",
   });
 
-  res.cookie("jwt", token, {
-    maxAge: 7 * 24 * 60 * 60 * 1000, // MS
-    httpOnly: true, // prevent XSS attacks: cross-site scripting
-    sameSite: "strict", // CSRF attacks
-    secure: ENV.NODE_ENV === "development" ? false : true,
+   res.cookie("jwt", token, {
+    httpOnly: true, // secure from JS access
+    secure: NODE_ENV === "development" ? false : true, // only send over HTTPS
+    sameSite: NODE_ENV === "development" ? "lax" : "none", // ✅ allow cross-domain cookies
+    path: "/", // ensures cookie is valid for all routes
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
-
   return token;
 };
 
