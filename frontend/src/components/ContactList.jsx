@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useChatStore } from "../store/useChatStore";
 import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
 import SearchInput from "./SearchInput";
+import { smartNameSearch } from "../lib/searchUtils";
 
 function ContactList() {
   const { getAllContacts, allContacts, setSelectedUser, isUsersLoading } = useChatStore();
@@ -13,9 +14,23 @@ function ContactList() {
     getAllContacts();
   }, [getAllContacts]);
 
-  const filteredContacts = allContacts.filter(contact =>
-    contact.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredContacts = useMemo(() => {
+    if (!searchQuery.trim()) return allContacts;
+    
+    return allContacts
+      .filter(contact => smartNameSearch(contact.fullName, searchQuery))
+      .sort((a, b) => {
+        // Sort exact matches first
+        const aStartsExact = a.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
+        const bStartsExact = b.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
+        
+        if (aStartsExact && !bStartsExact) return -1;
+        if (!aStartsExact && bStartsExact) return 1;
+        
+        // Then sort alphabetically
+        return a.fullName.localeCompare(b.fullName);
+      });
+  }, [allContacts, searchQuery]);
 
   if (isUsersLoading) return <UsersLoadingSkeleton />;
 

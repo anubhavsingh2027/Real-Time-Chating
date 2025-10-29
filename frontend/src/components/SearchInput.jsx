@@ -9,7 +9,7 @@ function SearchInput({ value, onChange, placeholder }) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full py-2 pl-10 pr-4 bg-cyan-500/5 rounded-lg 
+          className="w-full py-2 pl-10 pr-4 bg-cyan-500/5 rounded-lg
             border border-cyan-500/10 focus:border-cyan-500/20
             text-slate-200 placeholder:text-slate-400
             focus:outline-none focus:ring-1 focus:ring-cyan-500/20"

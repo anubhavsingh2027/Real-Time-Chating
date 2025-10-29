@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useChatStore } from "../store/useChatStore";
 import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
 import NoChatsFound from "./NoChatsFound";
 import { useAuthStore } from "../store/useAuthStore";
 import SearchInput from "./SearchInput";
+import { smartNameSearch } from "../lib/searchUtils";
 
 function ChatsList() {
   const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } = useChatStore();
@@ -14,9 +15,23 @@ function ChatsList() {
     getMyChatPartners();
   }, [getMyChatPartners]);
 
-  const filteredChats = chats.filter(chat =>
-    chat.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredChats = useMemo(() => {
+    if (!searchQuery.trim()) return chats;
+    
+    return chats
+      .filter(chat => smartNameSearch(chat.fullName, searchQuery))
+      .sort((a, b) => {
+        // Sort exact matches first
+        const aStartsExact = a.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
+        const bStartsExact = b.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
+        
+        if (aStartsExact && !bStartsExact) return -1;
+        if (!aStartsExact && bStartsExact) return 1;
+        
+        // Then sort alphabetically
+        return a.fullName.localeCompare(b.fullName);
+      });
+  }, [chats, searchQuery]);
 
   if (isUsersLoading) return <UsersLoadingSkeleton />;
   if (chats.length === 0) return <NoChatsFound />;
