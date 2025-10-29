@@ -27,6 +27,7 @@ export const arcjetProtection = async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.log("Arcjet Protection Error:", error);
     next();
   }
 };
