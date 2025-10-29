@@ -14,8 +14,10 @@ export const generateToken = (userId, res) => {
   res.cookie("jwt", token, {
     maxAge: 7 * 24 * 60 * 60 * 1000, // MS
     httpOnly: true, // prevent XSS attacks: cross-site scripting
-    sameSite: "strict", // CSRF attacks
-    secure: ENV.NODE_ENV === "development" ? false : true,
+    // When frontend and backend are on different origins (production),
+    // browsers require SameSite='none' and secure=true to send cookies cross-site.
+    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
+    secure: ENV.NODE_ENV === "production",
   });
 
   return token;

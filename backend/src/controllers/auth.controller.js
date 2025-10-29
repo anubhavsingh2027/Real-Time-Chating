@@ -97,7 +97,14 @@ export const login = async (req, res) => {
 };
 
 export const logout = (_, res) => {
-  res.cookie("jwt", "", { maxAge: 0 });
+  // Clear cookie using the same attributes used when setting it so the browser removes it correctly
+  res.cookie("jwt", "", {
+    maxAge: 0,
+    httpOnly: true,
+    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
+    secure: ENV.NODE_ENV === "production",
+  });
+
   res.status(200).json({ message: "Logged out successfully" });
 };
 
@@ -118,7 +125,7 @@ export const updateProfile = async (req, res) => {
 
     res.status(200).json(updatedUser);
   } catch (error) {
-    
+
     res.status(500).json({ message: "Internal server error" });
   }
 };
