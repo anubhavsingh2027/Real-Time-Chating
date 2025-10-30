@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { LogOutIcon, VolumeOffIcon, Volume2Icon, Settings } from "lucide-react";
+import { LogOut, VolumeX, Volume2, Settings } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -93,9 +93,9 @@ function ProfileHeader({ onOpenSettings }) {
             }}
           >
             {isSoundEnabled ? (
-              <Volume2Icon className="size-5" />
+              <Volume2 className="size-5" />
             ) : (
-              <VolumeOffIcon className="size-5" />
+              <VolumeX className="size-5" />
             )}
           </button>
 
@@ -104,7 +104,7 @@ function ProfileHeader({ onOpenSettings }) {
             className="text-slate-400 hover:text-slate-200 transition-colors"
             onClick={logout}
           >
-            <LogOutIcon className="size-5" />
+            <LogOut className="size-5" />
           </button>
         </div>
       </div>

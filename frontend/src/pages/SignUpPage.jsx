@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
-import { MessageCircleIcon, LockIcon, MailIcon, UserIcon, LoaderIcon } from "lucide-react";
-import { Link } from "react-router";
+import { MessageCircle, Lock, Mail, User, Loader } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function SignUpPage() {
   const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });
@@ -23,7 +23,7 @@ function SignUpPage() {
               <div className="w-full max-w-md">
                 {/* HEADING TEXT */}
                 <div className="text-center mb-8">
-                  <MessageCircleIcon className="w-12 h-12 mx-auto text-slate-400 mb-4" />
+                  <MessageCircle className="w-12 h-12 mx-auto text-slate-400 mb-4" />
                   <h2 className="text-2xl font-bold text-slate-200 mb-2">Create Account</h2>
                   <p className="text-slate-400">Sign up for a new account</p>
                 </div>
@@ -34,7 +34,7 @@ function SignUpPage() {
                   <div>
                     <label className="auth-input-label">Full Name</label>
                     <div className="relative">
-                      <UserIcon className="auth-input-icon" />
+                      <User className="auth-input-icon" />
 
                       <input
                         type="text"
@@ -50,7 +50,7 @@ function SignUpPage() {
                   <div>
                     <label className="auth-input-label">Email</label>
                     <div className="relative">
-                      <MailIcon className="auth-input-icon" />
+                      <Mail className="auth-input-icon" />
 
                       <input
                         type="email"
@@ -66,7 +66,7 @@ function SignUpPage() {
                   <div>
                     <label className="auth-input-label">Password</label>
                     <div className="relative">
-                      <LockIcon className="auth-input-icon" />
+                      <Lock className="auth-input-icon" />
 
                       <input
                         type="password"
@@ -81,7 +81,7 @@ function SignUpPage() {
                   {/* SUBMIT BUTTON */}
                   <button className="auth-btn" type="submit" disabled={isSigningUp}>
                     {isSigningUp ? (
-                      <LoaderIcon className="w-full h-5 animate-spin text-center" />
+                      <Loader className="w-full h-5 animate-spin text-center" />
                     ) : (
                       "Create Account"
                     )}
