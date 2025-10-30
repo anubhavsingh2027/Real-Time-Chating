@@ -29,48 +29,48 @@ function ChatPage() {
     <div className="relative h-screen lg:h-[800px] w-full max-w-6xl">
       {/* Mobile Layout */}
       <div className="lg:hidden h-full">
-        /* Chat List View */}
-          <div className={`fixed inset-0 bg-white dark:bg-slate-900 z-10 transition-transform duration-300 ${
-            selectedUser ? '-translate-x-full' : 'translate-x-0'
-          }`}>
-            <div className="h-full flex flex-col">
-              <div className="bg-emerald-600 dark:bg-slate-800 px-4 py-4 flex items-center gap-4">
-                <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 rounded-full overflow-hidden">
-            <img
-              src="/icon.png"
-              alt="Website logo"
-              className="w-full h-full object-cover"
-              />
-            </div>
-            <h1 className="text-xl font-medium text-white">Real Time Chating</h1>
+        {/* Chat List View */}
+        <div className={`fixed inset-0 bg-white dark:bg-slate-900 z-10 transition-transform duration-300 ${
+          selectedUser ? '-translate-x-full' : 'translate-x-0'
+        }`}>
+          <div className="h-full flex flex-col">
+            <div className="bg-emerald-600 dark:bg-slate-800 px-4 py-4 flex items-center gap-4">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                <img
+                  src="/icon.png"
+                  alt="Website logo"
+                  className="w-full h-full object-cover"
+                  />
                 </div>
-                <button
-            onClick={handleToggleSidebar}
-            className="text-white p-2 hover:bg-white/10 rounded-full"
-            aria-label="Settings"
-                >
-            <Settings className="w-6 h-6" />
-                </button>
+                <h1 className="text-xl font-medium text-white">Real Time Chating</h1>
               </div>
-              <ActiveTabSwitch />
-              <div className="flex-1 overflow-y-auto">
-                {activeTab === "chats" ? <ChatsList /> : <ContactList />}
-              </div>
+              <button
+                onClick={handleToggleSidebar}
+                className="text-white p-2 hover:bg-white/10 rounded-full"
+                aria-label="Menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </div>
+            <ActiveTabSwitch />
+            <div className="flex-1 overflow-y-auto">
+              {activeTab === "chats" ? <ChatsList /> : <ContactList />}
             </div>
           </div>
+        </div>
 
-          <div className={`fixed inset-0 bg-[#efeae2] dark:bg-slate-900 z-20 transition-transform duration-300 ${
-            selectedUser ? 'translate-x-0' : 'translate-x-full'
-          }`}>
-            {selectedUser && (
-              <div className="h-full flex flex-col">
-                <ChatContainer onBack={handleBack} />
-              </div>
-            )}
-          </div>
+        <div className={`fixed inset-0 bg-[#efeae2] dark:bg-slate-900 z-20 transition-transform duration-300 ${
+          selectedUser ? 'translate-x-0' : 'translate-x-full'
+        }`}>
+          {selectedUser && (
+            <div className="h-full flex flex-col">
+              <ChatContainer onBack={handleBack} />
+            </div>
+          )}
+        </div>
 
-          {/* Sliding Menu */}}
+        {/* Sliding Menu */}
         <div
           className={`fixed inset-y-0 left-0 w-80 bg-white dark:bg-slate-800 transform transition-transform duration-300 z-50 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
