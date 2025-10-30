@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Menu, X,Settings } from "lucide-react";
+import { useSettingsStore } from "../store/useSettingsStore";
+import { Menu, X, Settings } from "lucide-react";
 
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ProfileHeader from "../components/ProfileHeader";
@@ -14,8 +15,20 @@ import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
 function ChatPage() {
   const { activeTab, selectedUser, setSelectedUser } = useChatStore();
   const { authUser } = useAuthStore();
+  const { theme, enableSystemTheme } = useSettingsStore();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Theme handling
+  useEffect(() => {
+    if (enableSystemTheme) {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', isDark);
+    } else {
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+    }
+  }, [theme, enableSystemTheme]);
 
   const handleBack = () => {
     setSelectedUser(null);
@@ -84,7 +97,13 @@ function ChatPage() {
               >
                 <X className="w-6 h-6" />
               </button>
-              <h2 className="text-lg font-medium text-white">Setting</h2>
+              <h2 className="text-lg font-medium text-white">Menu</h2>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="text-white p-2 hover:bg-white/10 rounded-full ml-auto"
+              >
+                <Settings className="w-6 h-6" />
+              </button>
             </div>
             <ProfileHeader />
           </div>
@@ -99,16 +118,55 @@ function ChatPage() {
         )}
       </div>
 
+      {/* Settings Panel - Mobile */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50">
+          <div 
+            className="absolute inset-0"
+            onClick={() => setIsSettingsOpen(false)}
+          />
+          <div className="absolute inset-y-0 right-0 max-w-md w-full">
+            <SettingsPanel 
+              onClose={() => setIsSettingsOpen(false)} 
+              isMobile={true}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Desktop Layout */}
       <div className="hidden lg:block h-full">
         <BorderAnimatedContainer>
           <div className="w-80 bg-slate-800/50 backdrop-blur-sm flex flex-col">
-            <ProfileHeader />
+            <div className="flex items-center justify-between p-4">
+              <ProfileHeader />
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2 hover:bg-white/10 rounded-full text-white"
+                title="Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            </div>
             <ActiveTabSwitch />
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {activeTab === "chats" ? <ChatsList /> : <ContactList />}
             </div>
           </div>
+
+          {/* Settings Panel - Desktop */}
+          {isSettingsOpen && (
+            <div className="absolute inset-0 bg-black/50 z-50 flex justify-end">
+              <div 
+                className="absolute inset-0"
+                onClick={() => setIsSettingsOpen(false)}
+              />
+              <SettingsPanel 
+                onClose={() => setIsSettingsOpen(false)}
+                isMobile={false}
+              />
+            </div>
+          )}
           <div className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm">
             {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
           </div>
