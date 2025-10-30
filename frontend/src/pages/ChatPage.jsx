@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Menu, X } from "lucide-react";
+import { Menu, X,Settings } from "lucide-react";
 
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ProfileHeader from "../components/ProfileHeader";
@@ -48,9 +48,9 @@ function ChatPage() {
               <button
                 onClick={handleToggleSidebar}
                 className="text-white p-2 hover:bg-white/10 rounded-full"
-                aria-label="Menu"
+                aria-label="Settings"
               >
-                <Menu className="w-6 h-6" />
+                <Settings className="w-6 h-6" />
               </button>
             </div>
             <ActiveTabSwitch />
