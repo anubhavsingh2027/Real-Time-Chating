@@ -17,17 +17,17 @@ function ChatsList() {
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
-    
+
     return chats
       .filter(chat => smartNameSearch(chat.fullName, searchQuery))
       .sort((a, b) => {
         // Sort exact matches first
         const aStartsExact = a.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
         const bStartsExact = b.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
-        
+
         if (aStartsExact && !bStartsExact) return -1;
         if (!aStartsExact && bStartsExact) return 1;
-        
+
         // Then sort alphabetically
         return a.fullName.localeCompare(b.fullName);
       });

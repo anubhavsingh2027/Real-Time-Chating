@@ -16,17 +16,17 @@ function ContactList() {
 
   const filteredContacts = useMemo(() => {
     if (!searchQuery.trim()) return allContacts;
-    
+
     return allContacts
       .filter(contact => smartNameSearch(contact.fullName, searchQuery))
       .sort((a, b) => {
         // Sort exact matches first
         const aStartsExact = a.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
         const bStartsExact = b.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
-        
+
         if (aStartsExact && !bStartsExact) return -1;
         if (!aStartsExact && bStartsExact) return 1;
-        
+
         // Then sort alphabetically
         return a.fullName.localeCompare(b.fullName);
       });
