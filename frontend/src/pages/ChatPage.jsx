@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useChatStore } from "../store/useChatStore";
+import useChatStore from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { Menu, X, Settings } from "lucide-react";
