@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
 
-const useChatStore = create((set, get) => ({
+export const useChatStore = create((set, get) => ({
   allContacts: [],
   chats: [],
   messages: [],
@@ -176,5 +176,3 @@ const useChatStore = create((set, get) => ({
     socket.off("messageStatus");
   },
 }));
-
-export default useChatStore;

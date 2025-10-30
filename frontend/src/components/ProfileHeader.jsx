@@ -1,7 +1,7 @@
-import { useRef } from "react";
-import { LogOutIcon, Settings } from "lucide-react";
+import { useState, useRef } from "react";
+import { LogOutIcon, VolumeOffIcon, Volume2Icon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
-import { useSettingsStore } from "../store/useSettingsStore";
+import { useChatStore } from "../store/useChatStore";
 
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
