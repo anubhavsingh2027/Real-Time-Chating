@@ -4,6 +4,8 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { Menu, X, Settings } from "lucide-react";
 
+import SettingsPanel from "../components/SettingsPanel";
+
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ProfileHeader from "../components/ProfileHeader";
 import ActiveTabSwitch from "../components/ActiveTabSwitch";
