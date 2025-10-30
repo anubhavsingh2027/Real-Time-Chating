@@ -84,7 +84,7 @@ function ChatPage() {
               >
                 <X className="w-6 h-6" />
               </button>
-              <h2 className="text-lg font-medium text-white">Menu</h2>
+              <h2 className="text-lg font-medium text-white">Setting</h2>
             </div>
             <ProfileHeader />
           </div>
