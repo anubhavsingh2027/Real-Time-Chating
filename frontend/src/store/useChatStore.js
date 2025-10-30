@@ -75,7 +75,6 @@ export const useChatStore = create(
       isOptimistic: true,
     };
 
-    // Update UI immediately
     set({ messages: [...messages, optimisticMessage] });
 
     try {
