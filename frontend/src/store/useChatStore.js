@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist } from 'zustand/middleware';
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
@@ -178,12 +178,4 @@ export const useChatStore = create(
     socket.off("newMessage");
     socket.off("messageStatus");
   },
-}),
-{
-  name: 'chat-store',
-  merge: (persistedState, currentState) => ({
-    ...currentState,
-    ...persistedState,
-  })
-}
-));
+}));

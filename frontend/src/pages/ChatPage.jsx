@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { useSettingsStore } from "../store/useSettingsStore";
-import { Menu, X, Settings } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
-import SettingsPanel from "../components/SettingsPanel";
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ProfileHeader from "../components/ProfileHeader";
 import ActiveTabSwitch from "../components/ActiveTabSwitch";
@@ -18,7 +16,6 @@ function ChatPage() {
   const { authUser } = useAuthStore();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleBack = () => {
     setSelectedUser(null);
@@ -89,7 +86,7 @@ function ChatPage() {
               </button>
               <h2 className="text-lg font-medium text-white">Menu</h2>
             </div>
-            <ProfileHeader onOpenSettings={() => setIsSettingsOpen(true)} />
+            <ProfileHeader />
           </div>
         </div>
 
@@ -106,7 +103,7 @@ function ChatPage() {
       <div className="hidden lg:block h-full">
         <BorderAnimatedContainer>
           <div className="w-80 bg-slate-800/50 backdrop-blur-sm flex flex-col">
-            <ProfileHeader onOpenSettings={() => setIsSettingsOpen(true)} />
+            <ProfileHeader />
             <ActiveTabSwitch />
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {activeTab === "chats" ? <ChatsList /> : <ContactList />}
@@ -117,14 +114,7 @@ function ChatPage() {
           </div>
         </BorderAnimatedContainer>
       </div>
-
-      {/* Settings Panel */}
-      <SettingsPanel 
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
     </div>
   );
 }
-
 export default ChatPage;

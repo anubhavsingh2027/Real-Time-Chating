@@ -1,12 +1,11 @@
 import { useState, useRef } from "react";
-import { LogOut, VolumeX, Volume2, Settings } from "lucide-react";
+import { LogOutIcon, VolumeOffIcon, Volume2Icon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { useSettingsStore } from "../store/useSettingsStore";
 
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
-function ProfileHeader({ onOpenSettings }) {
+function ProfileHeader() {
   const { logout, authUser, updateProfile } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImg, setSelectedImg] = useState(null);
@@ -68,18 +67,12 @@ function ProfileHeader({ onOpenSettings }) {
 
         {/* BUTTONS */}
         <div className="flex gap-4 items-center">
-          {/* SETTINGS BTN */}
+          {/* LOGOUT BTN */}
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
-            onClick={() => {
-              if (isSoundEnabled) {
-                mouseClickSound.currentTime = 0;
-                mouseClickSound.play().catch(() => {});
-              }
-              onOpenSettings();
-            }}
+            onClick={logout}
           >
-            <Settings className="size-5" />
+            <LogOutIcon className="size-5" />
           </button>
 
           {/* SOUND TOGGLE BTN */}
@@ -93,18 +86,10 @@ function ProfileHeader({ onOpenSettings }) {
             }}
           >
             {isSoundEnabled ? (
-              <Volume2 className="size-5" />
+              <Volume2Icon className="size-5" />
             ) : (
-              <VolumeX className="size-5" />
+              <VolumeOffIcon className="size-5" />
             )}
-          </button>
-
-          {/* LOGOUT BTN */}
-          <button
-            className="text-slate-400 hover:text-slate-200 transition-colors"
-            onClick={logout}
-          >
-            <LogOut className="size-5" />
           </button>
         </div>
       </div>

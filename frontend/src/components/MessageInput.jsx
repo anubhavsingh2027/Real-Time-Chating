@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import useKeyboardSound from "../hooks/useKeyboardSound";
 import { useChatStore } from "../store/useChatStore";
 import toast from "react-hot-toast";
-import { Image, Send, X } from "lucide-react";
+import { ImageIcon, SendIcon, XIcon } from "lucide-react";
 
 function MessageInput() {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
@@ -59,7 +59,7 @@ function MessageInput() {
               className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
               type="button"
             >
-              <X className="w-4 h-4" />
+              <XIcon className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -73,7 +73,7 @@ function MessageInput() {
             imagePreview ? "text-emerald-500" : "text-slate-500 dark:text-slate-400"
           }`}
         >
-          <Image className="w-6 h-6" />
+          <ImageIcon className="w-6 h-6" />
         </button>
 
         <input
@@ -100,7 +100,7 @@ function MessageInput() {
           disabled={!text.trim() && !imagePreview}
           className="flex-none p-3 text-white rounded-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <Send className="w-6 h-6" />
+          <SendIcon className="w-6 h-6" />
         </button>
       </form>
     </div>
