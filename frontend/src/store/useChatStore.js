@@ -1,9 +1,12 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
 
-export const useChatStore = create((set, get) => ({
+export const useChatStore = create(
+  persist(
+    (set, get) => ({
   allContacts: [],
   chats: [],
   messages: [],
@@ -175,4 +178,12 @@ export const useChatStore = create((set, get) => ({
     socket.off("newMessage");
     socket.off("messageStatus");
   },
-}));
+}),
+{
+  name: 'chat-store',
+  merge: (persistedState, currentState) => ({
+    ...currentState,
+    ...persistedState,
+  })
+}
+));

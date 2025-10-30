@@ -117,13 +117,14 @@ function ChatPage() {
           </div>
         </BorderAnimatedContainer>
       </div>
-    </div>
 
       {/* Settings Panel */}
       <SettingsPanel 
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
+    </div>
   );
 }
+
 export default ChatPage;

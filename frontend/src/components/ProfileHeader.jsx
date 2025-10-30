@@ -72,8 +72,10 @@ function ProfileHeader({ onOpenSettings }) {
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
             onClick={() => {
-              mouseClickSound.currentTime = 0;
-              mouseClickSound.play().catch((error) => {});
+              if (isSoundEnabled) {
+                mouseClickSound.currentTime = 0;
+                mouseClickSound.play().catch(() => {});
+              }
               onOpenSettings();
             }}
           >
