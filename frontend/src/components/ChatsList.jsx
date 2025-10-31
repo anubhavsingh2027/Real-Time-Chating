@@ -19,7 +19,7 @@ function ChatsList() {
     if (!searchQuery.trim()) return chats;
 
     return chats
-      .filter(chat => smartNameSearch(chat.fullName, searchQuery))
+      .filter((chat) => smartNameSearch(chat.fullName, searchQuery))
       .sort((a, b) => {
         // Sort exact matches first
         const aStartsExact = a.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
@@ -38,32 +38,30 @@ function ChatsList() {
 
   return (
     <>
-      <SearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search chats..."
-      />
+      <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search chats..." />
       {filteredChats.length === 0 ? (
         <div className="px-4">
-          <p className="text-slate-400 text-center">No chats found</p>
+          <p className="text-gray-500 dark:text-slate-400 text-center">No chats found</p>
         </div>
       ) : (
-        filteredChats.map((chat) => (
-        <div
-          key={chat._id}
-          className="bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
-          onClick={() => setSelectedUser(chat)}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`avatar ${onlineUsers.includes(chat._id) ? "online" : "offline"}`}>
-              <div className="size-12 rounded-full">
-                <img src={chat.profilePic || "/avatar.png"} alt={chat.fullName} />
+        <div className="flex flex-col gap-2 p-4">
+          {filteredChats.map((chat) => (
+            <div
+              key={chat._id}
+              className="bg-gray-100 dark:bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-cyan-500/20 transition-colors"
+              onClick={() => setSelectedUser(chat)}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`avatar ${onlineUsers.includes(chat._id) ? "online" : "offline"}`}>
+                  <div className="size-12 rounded-full">
+                    <img src={chat.profilePic || "/avatar.png"} alt={chat.fullName} />
+                  </div>
+                </div>
+                <h4 className="text-black dark:text-slate-200 font-medium truncate">{chat.fullName}</h4>
               </div>
             </div>
-            <h4 className="text-slate-200 font-medium truncate">{chat.fullName}</h4>
-          </div>
+          ))}
         </div>
-        ))
       )}
     </>
   );

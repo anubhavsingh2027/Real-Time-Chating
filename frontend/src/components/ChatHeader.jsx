@@ -20,11 +20,11 @@ function ChatHeader({ onBack }) {
   }, [setSelectedUser]);
 
   return (
-    <div className="flex items-center bg-emerald-600 dark:bg-slate-800 h-16">
+    <div className="flex items-center bg-white dark:bg-slate-800 h-16 border-b border-gray-200 dark:border-slate-700/50">
       <div className="flex-1 flex items-center gap-4 px-4">
         <button
           onClick={onBack}
-          className="lg:hidden text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+          className="lg:hidden text-black dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 p-2 rounded-full transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
@@ -39,8 +39,8 @@ function ChatHeader({ onBack }) {
           </div>
 
           <div>
-            <h3 className="text-white font-medium leading-tight">{selectedUser.fullName}</h3>
-            <p className="text-emerald-100 dark:text-slate-300 text-sm leading-tight">
+            <h3 className="text-black dark:text-white font-medium leading-tight">{selectedUser.fullName}</h3>
+            <p className="text-gray-500 dark:text-slate-300 text-sm leading-tight">
               {isOnline ? "Online" : "Offline"}
             </p>
           </div>

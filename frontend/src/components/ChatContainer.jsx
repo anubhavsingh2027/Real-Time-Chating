@@ -37,7 +37,7 @@ function ChatContainer({ onBack }) {
   return (
     <div className="h-full flex flex-col">
       <ChatHeader onBack={onBack} />
-      <div className="flex-1 px-3 sm:px-6 overflow-y-auto py-4 sm:py-8 bg-[#efeae2] dark:bg-slate-900">
+      <div className="flex-1 px-3 sm:px-6 overflow-y-auto py-4 sm:py-4 bg-gray-100 dark:bg-slate-800">
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-3">
             {messages.map((msg) => (

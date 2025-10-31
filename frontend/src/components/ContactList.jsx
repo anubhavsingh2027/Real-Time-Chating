@@ -18,7 +18,7 @@ function ContactList() {
     if (!searchQuery.trim()) return allContacts;
 
     return allContacts
-      .filter(contact => smartNameSearch(contact.fullName, searchQuery))
+      .filter((contact) => smartNameSearch(contact.fullName, searchQuery))
       .sort((a, b) => {
         // Sort exact matches first
         const aStartsExact = a.fullName.toLowerCase().startsWith(searchQuery.toLowerCase());
@@ -36,32 +36,30 @@ function ContactList() {
 
   return (
     <>
-      <SearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search contacts..."
-      />
+      <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search contacts..." />
       {filteredContacts.length === 0 ? (
         <div className="px-4">
-          <p className="text-slate-400 text-center">No contacts found</p>
+          <p className="text-gray-500 dark:text-slate-400 text-center">No contacts found</p>
         </div>
       ) : (
-        filteredContacts.map((contact) => (
-        <div
-          key={contact._id}
-          className="bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
-          onClick={() => setSelectedUser(contact)}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`avatar ${onlineUsers.includes(contact._id) ? "online" : "offline"}`}>
-              <div className="size-12 rounded-full">
-                <img src={contact.profilePic || "/avatar.png"} />
+        <div className="flex flex-col gap-2 p-4">
+          {filteredContacts.map((contact) => (
+            <div
+              key={contact._id}
+              className="bg-gray-100 dark:bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-cyan-500/20 transition-colors"
+              onClick={() => setSelectedUser(contact)}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`avatar ${onlineUsers.includes(contact._id) ? "online" : "offline"}`}>
+                  <div className="size-12 rounded-full">
+                    <img src={contact.profilePic || "/avatar.png"} />
+                  </div>
+                </div>
+                <h4 className="text-black dark:text-slate-200 font-medium">{contact.fullName}</h4>
               </div>
             </div>
-            <h4 className="text-slate-200 font-medium">{contact.fullName}</h4>
-          </div>
+          ))}
         </div>
-        ))
       )}
     </>
   );

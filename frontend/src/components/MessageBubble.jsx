@@ -90,15 +90,15 @@ function MessageBubble({
     switch (messageStatus) {
       case 'sending':
         return (
-          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+          <div className="animate-spin w-4 h-4 border-2 border-black dark:border-white border-t-transparent rounded-full" />
         );
       case 'sent':
-        return <Check className="w-4 h-4 text-white" strokeWidth={2} />;
+        return <Check className="w-4 h-4 text-black dark:text-white" strokeWidth={2} />;
       case 'delivered':
         return (
           <div className="flex -space-x-1">
-            <Check className="w-4 h-4 text-white" strokeWidth={2} />
-            <Check className="w-4 h-4 text-white" strokeWidth={2} />
+            <Check className="w-4 h-4 text-black dark:text-white" strokeWidth={2} />
+            <Check className="w-4 h-4 text-black dark:text-white" strokeWidth={2} />
           </div>
         );
       case 'seen':
@@ -123,9 +123,10 @@ function MessageBubble({
     >
       <div
         className={`relative rounded-lg px-3.5 py-2.5
-          ${isOwnMessage
-            ? 'bg-emerald-500 text-white rounded-tr-none'
-            : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
+          ${
+            isOwnMessage
+              ? 'bg-emerald-500 text-white rounded-tr-none'
+              : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
           }
           transition-all duration-200 ease-in-out
         `}
@@ -166,11 +167,11 @@ function MessageBubble({
           onClick={handleToggleMenu}
           className={`absolute ${isOwnMessage ? '-left-7' : '-right-7'} top-1/2 -translate-y-1/2
             opacity-0 group-hover:opacity-100 transition-opacity duration-200
-            p-1.5 rounded-full bg-white/10 dark:bg-slate-800/50 backdrop-blur-sm
-            hover:bg-slate-200 dark:hover:bg-slate-700`}
+            p-1.5 rounded-full bg-gray-200/50 dark:bg-slate-800/50 backdrop-blur-sm
+            hover:bg-gray-300 dark:hover:bg-slate-700`}
           title="Message options"
         >
-          <ChevronDown className="w-4 h-4" />
+          <ChevronDown className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
 
         {/* Actions Menu */}
@@ -182,14 +183,14 @@ function MessageBubble({
                 : `${isOwnMessage ? 'left-0' : 'right-0'} -top-2 ${isOwnMessage ? '-translate-x-full' : 'translate-x-full'}`
             }`}
           >
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg py-1 w-28">
+            <div className="bg-gray-100 dark:bg-slate-800 rounded-lg shadow-lg py-1 w-28">
               <button
                 onClick={handleCopyMessage}
                 className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                  hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
               >
-                <Copy className="w-4 h-4" />
-                Copy
+                <Copy className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+                <span className="text-black dark:text-white">Copy</span>
               </button>
             </div>
           </div>

@@ -45,18 +45,18 @@ function MessageInput() {
   };
 
   return (
-    <div className="p-3 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+    <div className="p-3 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700">
       {imagePreview && (
         <div className="max-w-3xl mx-auto mb-3 flex items-center px-2">
           <div className="relative">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-slate-300 dark:border-slate-600"
+              className="w-20 h-20 object-cover rounded-lg border border-gray-300 dark:border-slate-600"
             />
             <button
               onClick={removeImage}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-gray-600 dark:text-slate-200 hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors"
               type="button"
             >
               <XIcon className="w-4 h-4" />
@@ -69,8 +69,8 @@ function MessageInput() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className={`flex-none p-3 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors ${
-            imagePreview ? "text-emerald-500" : "text-slate-500 dark:text-slate-400"
+          className={`flex-none p-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors ${
+            imagePreview ? "text-emerald-500" : "text-gray-500 dark:text-slate-400"
           }`}
         >
           <ImageIcon className="w-6 h-6" />
@@ -83,7 +83,7 @@ function MessageInput() {
             setText(e.target.value);
             isSoundEnabled && playRandomKeyStrokeSound();
           }}
-          className="flex-1 bg-white dark:bg-slate-700 rounded-full py-3 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-600"
+          className="flex-1 bg-gray-100 dark:bg-slate-700 rounded-full py-3 px-4 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-600"
           placeholder="Type a message"
         />
 
