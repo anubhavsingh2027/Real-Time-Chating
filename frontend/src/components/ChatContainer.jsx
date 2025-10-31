@@ -16,6 +16,7 @@ function ChatContainer({ onBack }) {
     subscribeToMessages,
     unsubscribeFromMessages,
     messageStatuses,
+    deleteMessage,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
@@ -50,6 +51,15 @@ function ChatContainer({ onBack }) {
                     ? 'sending'
                     : messageStatuses[msg._id] || 'sent'
                 }
+                onDelete={deleteMessage}
+                onReply={(message) => {
+                  // TODO: Implement reply functionality
+                  console.log("Reply to:", message);
+                }}
+                onForward={(message) => {
+                  // TODO: Implement forward functionality
+                  console.log("Forward:", message);
+                }}
               />
             ))}
             {/* 👇 scroll target */}

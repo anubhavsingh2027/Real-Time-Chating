@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
 
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ProfileHeader from "../components/ProfileHeader";
@@ -10,13 +11,12 @@ import ChatsList from "../components/ChatsList";
 import ContactList from "../components/ContactList";
 import ChatContainer from "../components/ChatContainer";
 import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
-import SettingsPanel from "../components/SettingsPanel";
 
 function ChatPage() {
+  const navigate = useNavigate();
   const { activeTab, selectedUser, setSelectedUser } = useChatStore();
   const { authUser } = useAuthStore();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   const handleBack = () => {
     setSelectedUser(null);
@@ -26,8 +26,8 @@ function ChatPage() {
     setSidebarOpen(!isSidebarOpen);
   };
 
-  const handleToggleSettings = () => {
-    setSettingsOpen(!isSettingsOpen);
+  const handleNavigateSettings = () => {
+    navigate("/settings");
   };
 
   return (
@@ -41,20 +41,29 @@ function ChatPage() {
           }`}
         >
           <div className="h-full flex flex-col">
-            <div className="bg-emerald-600 dark:bg-slate-800 px-4 py-4 flex items-center gap-4">
+            <div className="bg-emerald-600 dark:bg-slate-800 px-4 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   <img src="/icon.png" alt="Website logo" className="w-full h-full object-cover" />
                 </div>
                 <h1 className="text-xl font-medium text-white">Real Time Chating</h1>
               </div>
-              <button
-                onClick={handleToggleSidebar}
-                className="text-white p-2 hover:bg-white/10 rounded-full"
-                aria-label="Menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleNavigateSettings}
+                  className="text-white p-2 hover:bg-white/10 rounded-full"
+                  aria-label="Settings"
+                >
+                  <Settings className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={handleToggleSidebar}
+                  className="text-white p-2 hover:bg-white/10 rounded-full"
+                  aria-label="Menu"
+                >
+                  <Menu className="w-6 h-6" />
+                </button>
+              </div>
             </div>
             <ActiveTabSwitch />
             <div className="flex-1 overflow-y-auto">
@@ -86,13 +95,9 @@ function ChatPage() {
               <button onClick={handleToggleSidebar} className="text-white p-2 hover:bg-white/10 rounded-full">
                 <X className="w-6 h-6" />
               </button>
-              <h2 className="text-lg font-medium text-white">Menu</h2>
+              <h2 className="text-lg font-medium text-white">Profile</h2>
             </div>
-            {isSettingsOpen ? (
-              <SettingsPanel onBack={handleToggleSettings} />
-            ) : (
-              <ProfileHeader onOpenSettings={handleToggleSettings} />
-            )}
+            <ProfileHeader onOpenSettings={handleNavigateSettings} />
           </div>
         </div>
 
@@ -104,11 +109,21 @@ function ChatPage() {
       <div className="hidden lg:block h-full">
         <BorderAnimatedContainer>
           <div className="w-80 bg-gray-100/50 dark:bg-slate-800/50 backdrop-blur-sm flex flex-col">
-            {isSettingsOpen ? (
-              <SettingsPanel onBack={handleToggleSettings} />
-            ) : (
-              <ProfileHeader onOpenSettings={handleToggleSettings} />
-            )}
+            <div className="bg-emerald-600 dark:bg-slate-800 px-4 py-4 flex items-center justify-between border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                  <img src="/icon.png" alt="Website logo" className="w-full h-full object-cover" />
+                </div>
+                <h1 className="text-lg font-medium text-white">Real Time Chating</h1>
+              </div>
+              <button
+                onClick={handleNavigateSettings}
+                className="text-white p-2 hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Settings"
+              >
+                <Settings className="w-6 h-6" />
+              </button>
+            </div>
             <ActiveTabSwitch />
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {activeTab === "chats" ? <ChatsList /> : <ContactList />}
