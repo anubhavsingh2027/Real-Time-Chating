@@ -6,24 +6,17 @@ import {
   Download,
   ZoomIn,
   Trash2,
-  Smile,
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 
-/**
- * MessageBubble
- * props:
- *  - message: { _id, text, image, createdAt, reactions }
- *  - isOwnMessage: boolean
- *  - messageStatus: 'sending' | 'sent' | 'delivered' | 'seen'
- *  - onDelete?: function(id)
- */
 function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete }) {
   const [showActions, setShowActions] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showMenuButton, setShowMenuButton] = useState(false);
+  const longPressTimer = useRef(null);
   const bubbleRef = useRef(null);
   const imageRef = useRef(null);
   const { addReaction } = useChatStore();
@@ -44,7 +37,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       await navigator.clipboard.writeText(message.text || '');
       toast.success('Copied');
       setShowActions(false);
-    } catch (e) {
+    } catch {
       toast.error('Copy failed');
     }
   };
@@ -61,7 +54,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       link.click();
       link.remove();
       toast.success('Download started');
-    } catch (err) {
+    } catch {
       toast.error('Download failed');
     }
   };
@@ -107,14 +100,37 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
     }
   };
 
-  // Styles
+  // Hover + Long Press Behavior
+  const handleMouseEnter = () => setShowMenuButton(true);
+  const handleMouseLeave = () => {
+    if (!showActions) setShowMenuButton(false);
+  };
+
+  const handleTouchStart = () => {
+    longPressTimer.current = setTimeout(() => {
+      setShowActions(true);
+      setShowMenuButton(true);
+    }, 600); // 600ms long press
+  };
+
+  const handleTouchEnd = () => {
+    clearTimeout(longPressTimer.current);
+  };
+
   const containerAlign = isOwnMessage ? 'justify-end' : 'justify-start';
   const bubbleBackground = isOwnMessage
     ? 'bg-emerald-500 text-white'
     : 'bg-gray-800 text-gray-100 dark:bg-slate-700 dark:text-slate-100';
 
   return (
-    <div className={`w-full flex ${containerAlign} mb-2 px-3`} ref={bubbleRef}>
+    <div
+      className={`w-full flex ${containerAlign} mb-2 px-3`}
+      ref={bubbleRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <div className="relative max-w-[85%] flex flex-col items-end">
         <div
           className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
@@ -131,7 +147,6 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
                 onClick={() => setShowImageModal(true)}
                 onError={(e) => (e.currentTarget.style.display = 'none')}
                 className="w-auto h-auto max-w-full max-h-[60vh] object-contain cursor-pointer block"
-                style={{ display: 'block' }}
               />
             </div>
           )}
@@ -139,26 +154,33 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
           {/* Text */}
           {message.text && (
             <div className="text-sm leading-5 break-words whitespace-pre-wrap">
-              <span className="block">
-                {message.text}
-              </span>
+              <span className="block">{message.text}</span>
             </div>
           )}
 
           {/* Timestamp + status */}
           <div className="flex items-center gap-2 self-end mt-0.5">
             <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`}>
-              {message.createdAt ? new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+              {message.createdAt
+                ? new Date(message.createdAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : ''}
             </time>
             {isOwnMessage && <div className="flex items-center">{getStatusIcon()}</div>}
           </div>
         </div>
 
-        {/* Reaction / options button (compact) */}
-        <div className={`relative ${isOwnMessage ? 'right-0' : 'left-0'} mt-1`}>
+        {/* Reaction / options button (hover or long press) */}
+        <div
+          className={`relative ${isOwnMessage ? 'right-0' : 'left-0'} mt-1 transition-opacity duration-300 ${
+            showMenuButton ? 'opacity-100 visible' : 'opacity-0 invisible'
+          }`}
+        >
           <button
             onClick={() => setShowActions((s) => !s)}
-            className="-translate-y-2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-colors"
+            className="-translate-y-2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-all duration-300"
             aria-label="message actions"
           >
             <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`} />
@@ -168,31 +190,53 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             <div className={`absolute z-50 ${isOwnMessage ? 'right-0' : 'left-0'} mt-2`}>
               <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 w-40">
                 <div className="flex flex-col">
-                  <button onClick={handleCopyMessage} className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                  <button
+                    onClick={handleCopyMessage}
+                    className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                  >
                     <Copy className="w-4 h-4 text-gray-500" /> Copy
                   </button>
+
                   {message.image && (
                     <>
-                      <button onClick={() => { setShowImageModal(true); setShowActions(false); }} className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setShowImageModal(true);
+                          setShowActions(false);
+                        }}
+                        className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                      >
                         <ZoomIn className="w-4 h-4 text-gray-500" /> View
                       </button>
-                      <button onClick={() => handleDownloadImage(message.image)} className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                      <button
+                        onClick={() => handleDownloadImage(message.image)}
+                        className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                      >
                         <Download className="w-4 h-4 text-gray-500" /> Download
                       </button>
                     </>
                   )}
+
                   <div className="border-t border-gray-100 dark:border-slate-700 my-1" />
                   <div className="px-2 py-1 flex items-center gap-1">
                     {reactions.map((r) => (
-                      <button key={r} onClick={() => handleReaction(r)} className="text-lg p-1 hover:scale-110 transition-transform">
+                      <button
+                        key={r}
+                        onClick={() => handleReaction(r)}
+                        className="text-lg p-1 hover:scale-110 transition-transform"
+                      >
                         {r}
                       </button>
                     ))}
                   </div>
+
                   {isOwnMessage && (
                     <>
                       <div className="border-t border-gray-100 dark:border-slate-700 my-1" />
-                      <button onClick={handleDelete} className="px-3 py-2 text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-500">
+                      <button
+                        onClick={handleDelete}
+                        className="px-3 py-2 text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-500"
+                      >
                         <Trash2 className="w-4 h-4" /> Delete
                       </button>
                     </>
@@ -209,7 +253,9 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             {message.reactions.slice(0, 3).map((r, i) => (
               <span key={i}>{r.emoji || r}</span>
             ))}
-            {message.reactions.length > 3 && <span className="text-xs text-gray-500">+{message.reactions.length - 3}</span>}
+            {message.reactions.length > 3 && (
+              <span className="text-xs text-gray-500">+{message.reactions.length - 3}</span>
+            )}
           </div>
         )}
       </div>
@@ -235,7 +281,10 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               <X className="w-5 h-5" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); handleDownloadImage(message.image); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownloadImage(message.image);
+              }}
               className="absolute bottom-3 right-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-3 py-2 flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
