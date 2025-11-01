@@ -179,19 +179,23 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="relative max-w-[85%] flex flex-col items-end">
+      <div className={`relative max-w-[85%] flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'}`}>
         {/* WhatsApp-style emoji reaction popup - centered above message */}
         {showReactionPopup && (
           <div
-            className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in-95 duration-150`}
+            className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 
+              animate-in fade-in zoom-in-95 duration-200 origin-bottom`}
           >
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-2 flex items-center gap-1 ring-1 ring-black/5 dark:ring-white/10">
+            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-1.5 
+              flex items-center gap-0.5 ring-1 ring-black/5 dark:ring-white/10
+              scale-100 hover:scale-[1.02] transition-transform">
               {reactions.map((emoji) => (
                 <button
                   key={emoji}
                   onClick={() => handleReaction(emoji)}
-                  className="text-2xl p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors active:scale-95"
-                  title={emoji}
+                  className="text-2xl p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-700/70 
+                    transition-colors active:scale-90"
+                  title={`React with ${emoji}`}
                 >
                   {emoji}
                 </button>
