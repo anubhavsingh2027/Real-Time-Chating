@@ -32,6 +32,20 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
     return () => window.removeEventListener('keydown', onEsc);
   }, []);
 
+  // Ensure only one dropdown is open at a time across MessageBubble instances
+  useEffect(() => {
+    const onOtherOpen = (e) => {
+      const otherId = e.detail?.id;
+      if (!otherId) return;
+      if (otherId !== message._id) {
+        setShowActions(false);
+        setShowMenuButton(false);
+      }
+    };
+    window.addEventListener('message-dropdown-open', onOtherOpen);
+    return () => window.removeEventListener('message-dropdown-open', onOtherOpen);
+  }, [message._id]);
+
   const handleCopyMessage = async () => {
     try {
       await navigator.clipboard.writeText(message.text || '');
@@ -110,6 +124,8 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
     longPressTimer.current = setTimeout(() => {
       setShowActions(true);
       setShowMenuButton(true);
+      // notify others to close
+      window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
     }, 600); // 600ms long press
   };
 
@@ -174,77 +190,100 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Reaction / options button (hover or long press) */}
         <div
-          className={`relative ${isOwnMessage ? 'right-0' : 'left-0'} mt-1 transition-opacity duration-300 ${
+          className={`relative ${isOwnMessage ? 'right-0' : 'left-0'} mt-1 transition-opacity duration-200 ${
             showMenuButton ? 'opacity-100 visible' : 'opacity-0 invisible'
           }`}
         >
           <button
-            onClick={() => setShowActions((s) => !s)}
-            className="-translate-y-2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-all duration-300"
+            onClick={() => {
+              const next = !showActions;
+              setShowActions(next);
+              setShowMenuButton(true);
+              if (next) {
+                // notify others to close
+                window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
+              }
+            }}
+            className="-translate-y-2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-all duration-200 focus:outline-none"
             aria-label="message actions"
           >
             <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`} />
           </button>
 
-          {showActions && (
-            <div className={`absolute z-50 ${isOwnMessage ? 'right-0' : 'left-0'} mt-2`}>
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 w-40">
-                <div className="flex flex-col">
+          {/* Animated dropdown panel */}
+          <div className={`absolute z-50 ${isOwnMessage ? 'right-0' : 'left-0'} mt-2`}> 
+            <div
+              className={`transform origin-top-${isOwnMessage ? 'right' : 'left'} transition-all duration-150 ease-out ${
+                showActions ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
+              }`}
+            >
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-2 w-44">
+                {/* Copy */}
+                <div className="px-2">
                   <button
-                    onClick={handleCopyMessage}
-                    className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                    onClick={() => {
+                      handleCopyMessage();
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
                   >
-                    <Copy className="w-4 h-4 text-gray-500" /> Copy
+                    <Copy className="w-4 h-4 text-gray-500" />
+                    Copy
                   </button>
+                </div>
 
-                  {message.image && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setShowImageModal(true);
-                          setShowActions(false);
-                        }}
-                        className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                      >
-                        <ZoomIn className="w-4 h-4 text-gray-500" /> View
-                      </button>
-                      <button
-                        onClick={() => handleDownloadImage(message.image)}
-                        className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                      >
-                        <Download className="w-4 h-4 text-gray-500" /> Download
-                      </button>
-                    </>
-                  )}
-
-                  <div className="border-t border-gray-100 dark:border-slate-700 my-1" />
-                  <div className="px-2 py-1 flex items-center gap-1">
+                {/* Reactions row */}
+                <div className="px-2 pt-1">
+                  <div className="flex items-center justify-between gap-1 px-1">
                     {reactions.map((r) => (
                       <button
                         key={r}
                         onClick={() => handleReaction(r)}
-                        className="text-lg p-1 hover:scale-110 transition-transform"
+                        className="text-lg p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                        title={r}
                       >
                         {r}
                       </button>
                     ))}
                   </div>
-
-                  {isOwnMessage && (
-                    <>
-                      <div className="border-t border-gray-100 dark:border-slate-700 my-1" />
-                      <button
-                        onClick={handleDelete}
-                        className="px-3 py-2 text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-500"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </button>
-                    </>
-                  )}
                 </div>
+
+                {/* Image actions (if image) */}
+                {message.image && (
+                  <div className="mt-2 px-2">
+                    <button
+                      onClick={() => {
+                        setShowImageModal(true);
+                        setShowActions(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                    >
+                      <ZoomIn className="w-4 h-4 text-gray-500" /> View
+                    </button>
+                    <button
+                      onClick={() => handleDownloadImage(message.image)}
+                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4 text-gray-500" /> Download
+                    </button>
+                  </div>
+                )}
+
+                <div className="mt-2 border-t border-gray-100 dark:border-slate-700" />
+
+                {/* Delete */}
+                {isOwnMessage && (
+                  <div className="px-2 mt-1">
+                    <button
+                      onClick={handleDelete}
+                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Reactions preview */}
