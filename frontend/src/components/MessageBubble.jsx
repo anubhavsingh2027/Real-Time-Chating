@@ -13,6 +13,8 @@ import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 
 function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete }) {
+  // Custom toast state for bottom-center reaction feedback
+  const [reactionToast, setReactionToast] = useState(null);
   const [showActions, setShowActions] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showMenuButton, setShowMenuButton] = useState(false);
@@ -101,9 +103,10 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   const handleReaction = async (emoji) => {
     try {
       await addReaction(message._id, emoji);
-      // show success feedback and close menu
-      toast.success(`Reacted with ${emoji}`);
       setShowActions(false);
+      // Show custom bottom-center toast
+      setReactionToast(emoji);
+      setTimeout(() => setReactionToast(null), 2000);
     } catch (err) {
       console.error(err);
     }
@@ -165,6 +168,54 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
     ? 'bg-emerald-500 text-white'
     : 'bg-gray-800 text-gray-100 dark:bg-slate-700 dark:text-slate-100';
 
+  // --- Bubble arrow style ---
+  const arrowSize = 16;
+  const arrowStyle = isOwnMessage
+    ? {
+        right: -arrowSize + 2,
+        top: 12,
+        width: arrowSize,
+        height: arrowSize,
+        position: 'absolute',
+        zIndex: 1,
+        background: 'var(--bubble-bg, #10b981)',
+        clipPath:
+          'polygon(0 0, 100% 50%, 0 100%)',
+        boxShadow: '2px 2px 6px 0 rgba(0,0,0,0.08)',
+      }
+    : {
+        left: -arrowSize + 2,
+        top: 12,
+        width: arrowSize,
+        height: arrowSize,
+        position: 'absolute',
+        zIndex: 1,
+        background: 'var(--bubble-bg, #1e293b)',
+        clipPath:
+          'polygon(100% 0, 0 50%, 100% 100%)',
+        boxShadow: '-2px 2px 6px 0 rgba(0,0,0,0.08)',
+      };
+
+  // --- Popup dynamic positioning ---
+  const [popupPos, setPopupPos] = useState('below');
+  useEffect(() => {
+    if (!showActions) return;
+    const bubble = bubbleRef.current;
+    if (!bubble) return;
+    const rect = bubble.getBoundingClientRect();
+    const spaceAbove = rect.top;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    setPopupPos(spaceBelow < 180 && spaceAbove > spaceBelow ? 'above' : 'below');
+  }, [showActions]);
+
+  // --- CSS variables for theme consistency ---
+  const rootVars = {
+    '--popup-bg': 'var(--popup-bg, #fff)',
+    '--popup-shadow': 'var(--popup-shadow, 0 4px 24px 0 rgba(0,0,0,0.12))',
+    '--toast-bg': 'var(--toast-bg, #222c)',
+    '--bubble-bg': isOwnMessage ? '#10b981' : '#1e293b',
+  };
+
   return (
     <div
       className={`w-full flex ${containerAlign} mb-2 px-3`}
@@ -173,128 +224,158 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      style={rootVars}
     >
       <div className="relative max-w-[85%] flex flex-col items-end">
-        <div
-          className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
-            isOwnMessage ? 'rounded-tr-2xl rounded-br-none' : 'rounded-tl-2xl rounded-bl-none'
-          } ${bubbleBackground} bg-opacity-95`}
-        >
-          {/* Image (if present) */}
-          {message.image && (
-            <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
-              <img
-                ref={imageRef}
-                src={message.image}
-                alt={message.text ? 'attachment' : 'image'}
-                onClick={() => setShowImageModal(true)}
-                onError={(e) => (e.currentTarget.style.display = 'none')}
-                className="w-auto h-auto max-w-full max-h-[60vh] object-contain cursor-pointer block"
-              />
-            </div>
-          )}
+        <div className="relative">
+          {/* Bubble arrow */}
+          <div style={arrowStyle} />
+          <div
+            className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
+              isOwnMessage ? 'rounded-tr-2xl rounded-br-none' : 'rounded-tl-2xl rounded-bl-none'
+            } ${bubbleBackground} bg-opacity-95`}
+          >
+            {/* Image (if present) */}
+            {message.image && (
+              <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
+                <img
+                  ref={imageRef}
+                  src={message.image}
+                  alt={message.text ? 'attachment' : 'image'}
+                  onClick={() => setShowImageModal(true)}
+                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                  className="w-auto h-auto max-w-full max-h-[60vh] object-contain cursor-pointer block"
+                />
+              </div>
+            )}
 
-          {/* Text */}
-          {message.text && (
-            <div className="text-sm leading-5 break-words whitespace-pre-wrap">
-              <span className="block">{message.text}</span>
-            </div>
-          )}
+            {/* Text */}
+            {message.text && (
+              <div className="text-sm leading-5 break-words whitespace-pre-wrap">
+                <span className="block">{message.text}</span>
+              </div>
+            )}
 
-          {/* Timestamp + status */}
-          <div className="flex items-center gap-2 self-end mt-0.5">
-            <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`}>
-              {message.createdAt
-                ? new Date(message.createdAt).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : ''}
-            </time>
-            {isOwnMessage && <div className="flex items-center">{getStatusIcon()}</div>}
+            {/* Timestamp + status */}
+            <div className="flex items-center gap-2 self-end mt-0.5">
+              <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`}>
+                {message.createdAt
+                  ? new Date(message.createdAt).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : ''}
+              </time>
+              {isOwnMessage && <div className="flex items-center">{getStatusIcon()}</div>}
+            </div>
           </div>
         </div>
 
         {/* Reaction / options button (hover or long press) */}
         <div
-          className={`absolute top-0 right-0 transform translate-y-[-8px] transition-opacity duration-200 ${
+          className={`absolute top-0 ${isOwnMessage ? 'right-0' : 'left-0'} transform translate-y-[-8px] transition-opacity duration-200 ${
             showMenuButton ? 'opacity-100 visible' : 'opacity-0 invisible'
           }`}
         >
-          <div className="flex items-start">
-            <button
-              onClick={() => {
-                const next = !showActions;
-                setShowActions(next);
-                setShowMenuButton(true);
-                if (next) {
-                  // notify others to close
-                  window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
-                }
+          <button
+            onClick={() => {
+              const next = !showActions;
+              setShowActions(next);
+              setShowMenuButton(true);
+              if (next) {
+                // notify others to close
+                window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
+              }
+            }}
+            className={`-translate-y-1 p-1.5 rounded-full transition-all duration-150 focus:outline-none ${
+              isOwnMessage ? 'bg-emerald-600/20 hover:bg-emerald-600/30' : 'bg-white/10 hover:bg-white/20'
+            }`}
+            aria-label="message actions"
+          >
+            <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/90' : 'text-gray-300'}`} />
+          </button>
+
+          {/* Menu panel, dynamic position */}
+          {showActions && (
+            <div
+              className={`fixed z-50`}
+              style={{
+                left: (() => {
+                  const rect = bubbleRef.current?.getBoundingClientRect();
+                  if (!rect) return 0;
+                  return isOwnMessage ? rect.right - 220 : rect.left;
+                })(),
+                top: (() => {
+                  const rect = bubbleRef.current?.getBoundingClientRect();
+                  if (!rect) return 0;
+                  if (popupPos === 'above') return rect.top - 60;
+                  return rect.bottom + 8;
+                })(),
+                minWidth: 180,
+                maxWidth: 240,
               }}
-              className={`-translate-y-1 p-1.5 rounded-full transition-all duration-150 focus:outline-none ${
-                isOwnMessage ? 'bg-emerald-600/20 hover:bg-emerald-600/30' : 'bg-white/10 hover:bg-white/20'
-              }`}
-              aria-label="message actions"
             >
-              <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/90' : 'text-gray-300'}`} />
-            </button>
-
-            {/* Menu panel */}
-            <div className={`ml-2 relative`}> 
               <div
-                className={`transform origin-top-right transition-all duration-150 ease-out ${
-                  showActions ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
-                }`}
+                className={`rounded-[13px] shadow-lg py-2 px-2 backdrop-blur-sm border border-black/5 dark:border-white/10 transition-all duration-200 scale-100 opacity-100 bg-[var(--popup-bg)]`}
+                style={{
+                  boxShadow: 'var(--popup-shadow)',
+                  background: 'var(--popup-bg)',
+                  padding: 12,
+                  minWidth: 180,
+                  maxWidth: 240,
+                }}
               >
-                <div className="rounded-lg shadow-lg py-2 w-44 backdrop-blur-sm bg-white/95 dark:bg-black/70 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/5">
-                  {/* Copy */}
-                  <div className="px-2">
+                {/* Copy */}
+                <button
+                  onClick={handleCopyMessage}
+                  className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                >
+                  <Copy className="w-4 h-4 text-gray-500" />
+                  Copy
+                </button>
+                {/* Emoji row */}
+                <div className="flex items-center justify-between gap-1 px-1 mt-2 mb-1">
+                  {reactions.map((r) => (
                     <button
-                      onClick={() => {
-                        handleCopyMessage();
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                      key={r}
+                      onClick={() => handleReaction(r)}
+                      className="text-lg p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                      title={r}
+                      style={{ fontSize: 22 }}
                     >
-                      <Copy className="w-4 h-4 text-gray-500" />
-                      Copy
+                      {r}
                     </button>
-                  </div>
-
-                  {/* Emoji row */}
-                  <div className="px-2 pt-1">
-                    <div className="flex items-center justify-between gap-1 px-1">
-                      {reactions.map((r) => (
-                        <button
-                          key={r}
-                          onClick={() => handleReaction(r)}
-                          className="text-lg p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                          title={r}
-                        >
-                          {r}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-2 border-t border-gray-100 dark:border-white/5" />
-
-                  {/* Delete */}
-                  {isOwnMessage && (
-                    <div className="px-2 mt-1">
-                      <button
-                        onClick={handleDelete}
-                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </button>
-                    </div>
-                  )}
+                  ))}
                 </div>
+                <div className="mt-2 border-t border-gray-100 dark:border-white/5" />
+                {/* Delete */}
+                {isOwnMessage && (
+                  <button
+                    onClick={handleDelete}
+                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors mt-1"
+                  >
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </button>
+                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
+
+        {/* Custom bottom-center reaction toast */}
+        {reactionToast && (
+          <div
+            className="fixed left-1/2 bottom-8 z-[9999] px-4 py-2 rounded-lg text-white text-base font-medium shadow-lg animate-fadeout"
+            style={{
+              background: 'var(--toast-bg)',
+              transform: 'translateX(-50%)',
+              transition: 'opacity 0.4s',
+              opacity: reactionToast ? 1 : 0,
+            }}
+          >
+            Reacted with {reactionToast}
+          </div>
+        )}
 
         {/* Reactions preview */}
         {message.reactions && message.reactions.length > 0 && (
