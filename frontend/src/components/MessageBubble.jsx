@@ -6,7 +6,7 @@ import { useLayoutEffect } from 'react';
 function MessageBubble({
   message,
   isOwnMessage,
-  messageStatus = 'sent', // 'sending', 'sent', 'delivered', 'seen'
+  messageStatus = 'sent',
   onReply,
   onDelete,
   onForward
@@ -22,15 +22,14 @@ function MessageBubble({
   const [dynamicWidth, setDynamicWidth] = useState('fit-content');
 
   const reactions = [
-    { emoji: '❤️', name: 'heart', icon: Heart },
-    { emoji: '👍', name: 'thumbs-up', icon: ThumbsUp },
-    { emoji: '😊', name: 'smile', icon: Smile },
+    { emoji: '❤️', name: 'heart' },
+    { emoji: '👍', name: 'thumbs-up' },
+    { emoji: '😊', name: 'smile' },
     { emoji: '😂', name: 'laugh' },
     { emoji: '😮', name: 'wow' },
     { emoji: '😢', name: 'sad' },
   ];
 
-  // Calculate message width
   useLayoutEffect(() => {
     if (messageTextRef.current && bubbleRef.current && message.text) {
       const containerWidth = bubbleRef.current.parentElement.offsetWidth;
@@ -45,7 +44,6 @@ function MessageBubble({
     }
   }, [message.text]);
 
-  // Handle message copy
   const handleCopyMessage = async () => {
     try {
       await navigator.clipboard.writeText(message.text);
@@ -57,7 +55,6 @@ function MessageBubble({
     }
   };
 
-  // Handle image download
   const handleDownloadImage = async () => {
     try {
       const response = await fetch(message.image);
@@ -77,22 +74,20 @@ function MessageBubble({
     }
   };
 
-  // Handle image zoom
   const handleZoomImage = () => {
     setShowImageModal(true);
     setShowActions(false);
   };
 
-  // Handle reply
   const handleReply = () => {
     if (onReply) {
       onReply(message);
+      toast.success('Reply to message set');
     }
     setShowActions(false);
     setIsLongPress(false);
   };
 
-  // Handle delete
   const handleDelete = () => {
     if (onDelete) {
       if (window.confirm('Are you sure you want to delete this message?')) {
@@ -104,29 +99,26 @@ function MessageBubble({
     setIsLongPress(false);
   };
 
-  // Handle forward
   const handleForward = () => {
     if (onForward) {
       onForward(message);
+      toast.success('Message ready to forward');
     }
     setShowActions(false);
     setIsLongPress(false);
   };
 
-  // Handle reaction
   const handleReaction = (reaction) => {
     setSelectedReaction(reaction);
     setShowReactions(false);
     toast.success(`Reacted with ${reaction.emoji}`);
   };
 
-  // Toggle menu on down arrow click
   const handleToggleMenu = (e) => {
     e.stopPropagation();
     setShowActions(prev => !prev);
   };
 
-  // Mobile long press handlers
   const handleTouchStart = () => {
     longPressTimer.current = setTimeout(() => {
       setIsLongPress(true);
@@ -140,7 +132,6 @@ function MessageBubble({
     }
   };
 
-  // Use effect to handle clicking outside
   useEffect(() => {
     if (showActions || isLongPress) {
       const handleClickOutside = (e) => {
@@ -151,20 +142,14 @@ function MessageBubble({
       };
 
       document.addEventListener('click', handleClickOutside);
-
-      return () => {
-        document.removeEventListener('click', handleClickOutside);
-      };
+      return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [showActions, isLongPress]);
 
-  // Get status icon based on message state
   const getStatusIcon = () => {
     switch (messageStatus) {
       case 'sending':
-        return (
-          <div className="animate-spin w-4 h-4 border-2 border-black dark:border-white border-t-transparent rounded-full" />
-        );
+        return <div className="animate-spin w-4 h-4 border-2 border-black dark:border-white border-t-transparent rounded-full" />;
       case 'sent':
         return <Check className="w-4 h-4 text-black dark:text-white" strokeWidth={2} />;
       case 'delivered':
@@ -197,24 +182,18 @@ function MessageBubble({
       >
         <div
           className={`relative rounded-lg px-3.5 py-2.5
-            ${
-              isOwnMessage
-                ? 'bg-emerald-500 text-white rounded-tr-none'
-                : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'
-            }
-            transition-all duration-200 ease-in-out
-          `}
+            ${isOwnMessage ? 'bg-emerald-500 text-white rounded-tr-none' : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'}
+            transition-all duration-200 ease-in-out`}
         >
-          {/* Message Content */}
           {message.image && (
-            <div className="relative group/image">
+            <div className="relative group/image mb-1">
               <img
                 src={message.image}
                 alt="Shared"
-                className="rounded-lg max-h-60 w-full object-cover mb-1 cursor-pointer"
+                className="rounded-lg max-w-sm w-auto cursor-pointer"
                 onClick={handleZoomImage}
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity rounded-lg flex items-center justify-center pointer-events-none">
                 <ZoomIn className="w-8 h-8 text-white" />
               </div>
             </div>
@@ -227,62 +206,49 @@ function MessageBubble({
             </div>
           )}
 
-          {/* Footer: Time and Status */}
           <div className="flex items-center justify-end gap-1 mt-1">
             <span className="text-[0.65rem] opacity-75">
-              {new Date(message.createdAt).toLocaleTimeString(undefined, {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              {new Date(message.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
             </span>
-            {isOwnMessage && (
-              <div className="flex items-center transition-opacity duration-200">
-                {getStatusIcon()}
-              </div>
-            )}
+            {isOwnMessage && <div className="flex items-center transition-opacity duration-200">{getStatusIcon()}</div>}
           </div>
 
-          {/* Reaction Display */}
           {selectedReaction && (
             <div className="absolute -bottom-2 right-2 bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-600">
               <span className="text-sm">{selectedReaction.emoji}</span>
             </div>
           )}
 
-          {/* Down Arrow Button */}
           <button
             onClick={handleToggleMenu}
             className={`absolute ${isOwnMessage ? '-left-7' : '-right-7'} top-1/2 -translate-y-1/2
               opacity-0 group-hover:opacity-100 transition-opacity duration-200
               p-1.5 rounded-full bg-gray-200/50 dark:bg-slate-800/50 backdrop-blur-sm
-              hover:bg-gray-300 dark:hover:bg-slate-700`}
+              hover:bg-gray-300 dark:hover:bg-slate-700 z-10`}
             title="Message options"
           >
             <ChevronDown className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
 
-          {/* Actions Menu */}
           {showActions && (
             <div
-              className={`absolute z-50 ${
+              className={`absolute z-[60] ${
                 isLongPress
                   ? `top-1/2 -translate-y-1/2 ${isOwnMessage ? '-left-36' : '-right-36'}`
                   : `${isOwnMessage ? 'left-0' : 'right-0'} -top-2 ${isOwnMessage ? '-translate-x-full' : 'translate-x-full'}`
               }`}
             >
               <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 py-1 w-36">
-                {/* Reactions */}
                 <div className="relative">
                   <button
                     onClick={() => setShowReactions(!showReactions)}
-                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                      hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                   >
                     <Smile className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                     <span className="text-black dark:text-white">React</span>
                   </button>
                   {showReactions && (
-                    <div className="absolute left-full top-0 ml-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 p-2 flex gap-1">
+                    <div className="absolute left-full top-0 ml-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 p-2 flex gap-1 z-[70]">
                       {reactions.map((reaction) => (
                         <button
                           key={reaction.name}
@@ -297,43 +263,36 @@ function MessageBubble({
                   )}
                 </div>
 
-                {/* Reply */}
                 <button
                   onClick={handleReply}
-                  className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                    hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 >
                   <Reply className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                   <span className="text-black dark:text-white">Reply</span>
                 </button>
 
-                {/* Copy (text only) */}
                 {message.text && (
                   <button
                     onClick={handleCopyMessage}
-                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                      hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                   >
                     <Copy className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                     <span className="text-black dark:text-white">Copy</span>
                   </button>
                 )}
 
-                {/* Download (image only) */}
                 {message.image && (
                   <>
                     <button
                       onClick={handleZoomImage}
-                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                        hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                     >
                       <ZoomIn className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                       <span className="text-black dark:text-white">View</span>
                     </button>
                     <button
                       onClick={handleDownloadImage}
-                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                        hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                     >
                       <Download className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                       <span className="text-black dark:text-white">Download</span>
@@ -341,22 +300,18 @@ function MessageBubble({
                   </>
                 )}
 
-                {/* Forward */}
                 <button
                   onClick={handleForward}
-                  className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                    hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 >
                   <Forward className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                   <span className="text-black dark:text-white">Forward</span>
                 </button>
 
-                {/* Delete (own messages only) */}
                 {isOwnMessage && (
                   <button
                     onClick={handleDelete}
-                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2
-                      hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
                     <Trash2 className="w-4 h-4 text-red-500" />
                     <span className="text-red-500">Delete</span>
@@ -368,7 +323,6 @@ function MessageBubble({
         </div>
       </div>
 
-      {/* Image Modal */}
       {showImageModal && message.image && (
         <div
           className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
@@ -383,7 +337,7 @@ function MessageBubble({
             />
             <button
               onClick={() => setShowImageModal(false)}
-              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -394,7 +348,7 @@ function MessageBubble({
                 e.stopPropagation();
                 handleDownloadImage();
               }}
-              className="absolute bottom-4 right-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-4 py-2 flex items-center gap-2 transition-colors"
+              className="absolute bottom-4 right-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-4 py-2 flex items-center gap-2 transition-colors z-10"
             >
               <Download className="w-5 h-5" />
               <span>Download</span>

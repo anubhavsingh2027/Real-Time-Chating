@@ -17,9 +17,15 @@ export const useChatStore = create(
       isUsersLoading: false,
       isMessagesLoading: false,
       isSoundEnabled: useSettingsStore.getState().soundEffects,
+      replyToMessage: null,
+      forwardMessage: null,
 
       setActiveTab: (tab) => set({ activeTab: tab }),
       setSelectedUser: (selectedUser) => set({ selectedUser }),
+      setReplyToMessage: (message) => set({ replyToMessage: message }),
+      clearReplyToMessage: () => set({ replyToMessage: null }),
+      setForwardMessage: (message) => set({ forwardMessage: message }),
+      clearForwardMessage: () => set({ forwardMessage: null }),
 
       getAllContacts: async () => {
         set({ isUsersLoading: true });
@@ -57,7 +63,7 @@ export const useChatStore = create(
       },
 
       sendMessage: async (messageData) => {
-        const { selectedUser, messages } = get();
+        const { selectedUser, messages, replyToMessage } = get();
         const { authUser, socket } = useAuthStore.getState();
 
         const tempId = `temp-${Date.now()}`;
@@ -67,6 +73,12 @@ export const useChatStore = create(
           receiverId: selectedUser._id,
           text: messageData.text,
           image: messageData.image,
+          replyTo: replyToMessage ? {
+            _id: replyToMessage._id,
+            text: replyToMessage.text,
+            image: replyToMessage.image,
+            senderId: replyToMessage.senderId,
+          } : null,
           createdAt: new Date().toISOString(),
           isOptimistic: true,
         };
@@ -74,8 +86,15 @@ export const useChatStore = create(
         set({ messages: [...messages, optimisticMessage] });
 
         try {
-          const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
+          const payload = {
+            ...messageData,
+            replyTo: replyToMessage?._id || null,
+          };
+          const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, payload);
           const actualMessage = res.data;
+
+          // Clear reply after sending
+          get().clearReplyToMessage();
 
           // Update messages, replacing optimistic with actual
           set((state) => ({

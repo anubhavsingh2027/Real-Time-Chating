@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
@@ -17,19 +17,26 @@ import {
   Search,
   Palette,
   Settings as SettingsIcon,
+  Camera,
+  User,
+  Mail,
 } from "lucide-react";
 import useSettingsStore from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import Select from "../components/Select";
+import toast from "react-hot-toast";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const settings = useSettingsStore();
-  const { logout, authUser } = useAuthStore();
+  const { logout, authUser, updateProfile } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const fileInputRef = useRef(null);
   const [expandedSections, setExpandedSections] = useState({
-    notifications: true,
+    profile: true,
+    notifications: false,
     appearance: false,
     privacy: false,
     chat: false,
@@ -175,6 +182,35 @@ const SettingsPage = () => {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    setIsUpdatingProfile(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        await updateProfile({ profilePic: reader.result });
+        toast.success("Profile picture updated successfully!");
+      } catch (error) {
+        toast.error("Failed to update profile picture");
+      } finally {
+        setIsUpdatingProfile(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const filterSections = (sectionName) => {
     if (!searchQuery) return true;
     return sectionName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -183,7 +219,7 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
@@ -226,6 +262,100 @@ const SettingsPage = () => {
       {/* Settings Content with padding for fixed header */}
       <div className="pt-40 pb-32 px-4">
         <div className="max-w-4xl mx-auto space-y-3">
+          {/* Profile Section */}
+          {filterSections("profile") && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+              <SectionHeader
+                icon={User}
+                title="Profile"
+                section="profile"
+              />
+              {expandedSections.profile && (
+                <div className="p-6">
+                  {/* Profile Picture */}
+                  <div className="flex flex-col items-center mb-6">
+                    <div className="relative group">
+                      <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-emerald-500 to-cyan-500">
+                        {authUser?.profilePic ? (
+                          <img
+                            src={authUser.profilePic}
+                            alt={authUser.fullName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white text-4xl font-bold">
+                            {authUser?.fullName?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUpdatingProfile}
+                        className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-emerald-500 hover:bg-emerald-600 flex items-center justify-center text-white shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isUpdatingProfile ? (
+                          <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                        ) : (
+                          <Camera className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      Click camera icon to change profile picture
+                    </p>
+                  </div>
+
+                  {/* Profile Information */}
+                  <div className="space-y-4">
+                    <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Full Name
+                      </label>
+                      <div className="flex items-center gap-3 mt-2">
+                        <User className="w-5 h-5 text-gray-400" />
+                        <p className="text-base font-semibold text-black dark:text-white">
+                          {authUser?.fullName}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Email
+                      </label>
+                      <div className="flex items-center gap-3 mt-2">
+                        <Mail className="w-5 h-5 text-gray-400" />
+                        <p className="text-base text-black dark:text-white">
+                          {authUser?.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Member Since
+                      </label>
+                      <p className="text-base text-black dark:text-white mt-2">
+                        {new Date(authUser?.createdAt).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Notifications & Sounds */}
           {filterSections("notifications") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
@@ -580,7 +710,7 @@ const SettingsPage = () => {
       </div>
 
       {/* Fixed Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="max-w-4xl mx-auto p-4 space-y-2">
           <button
             onClick={handleResetSettings}
