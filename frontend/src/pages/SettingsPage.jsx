@@ -124,23 +124,24 @@ const SettingsPage = () => {
 
   const ToggleSwitch = ({ checked, onChange, label, description }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex-1">
-        <label className="text-sm font-medium">{label}</label>
+      <div className="flex-1 pr-4">
+        <label className="text-sm font-medium cursor-pointer select-none">{label}</label>
         {description && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {description}
           </p>
         )}
       </div>
-      <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
+      <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out flex-shrink-0">
         <input
           type="checkbox"
           checked={checked}
           onChange={onChange}
-          className="sr-only"
+          className="sr-only peer"
+          id={`toggle-${label}`}
         />
-        <div
-          onClick={onChange}
+        <label
+          htmlFor={`toggle-${label}`}
           className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
             checked ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"
           }`}
@@ -150,7 +151,7 @@ const SettingsPage = () => {
               checked ? "transform translate-x-6" : ""
             }`}
           />
-        </div>
+        </label>
       </div>
     </div>
   );
@@ -158,7 +159,7 @@ const SettingsPage = () => {
   const SectionHeader = ({ icon: Icon, title, section }) => (
     <button
       onClick={() => toggleSection(section)}
-      className="flex items-center justify-between w-full p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+      className="flex items-center justify-between w-full p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
     >
       <div className="flex items-center gap-3">
         <Icon className="w-5 h-5 text-blue-500" />
@@ -179,6 +180,7 @@ const SettingsPage = () => {
       )
     ) {
       settings.resetSettings();
+      toast.success("Settings reset to defaults");
     }
   };
 
@@ -203,7 +205,8 @@ const SettingsPage = () => {
         await updateProfile({ profilePic: reader.result });
         toast.success("Profile picture updated successfully!");
       } catch (error) {
-        toast.error("Failed to update profile picture");
+        console.error("Profile update error:", error);
+        toast.error(error.response?.data?.message || "Failed to update profile picture");
       } finally {
         setIsUpdatingProfile(false);
       }
@@ -218,10 +221,10 @@ const SettingsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
-      {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between p-4">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40">
+        <div className="w-full px-4 lg:px-8">
+          <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate("/")}
@@ -244,27 +247,27 @@ const SettingsPage = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="px-4 pb-4">
+          <div className="pb-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search settings..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Settings Content with padding for fixed header */}
-      <div className="pt-40 pb-32 px-3 sm:px-4">
-        <div className="max-w-4xl mx-auto space-y-2 sm:space-y-3">
+      {/* Settings Content */}
+      <div className="w-full px-4 lg:px-8 py-6 pb-32">
+        <div className="max-w-7xl mx-auto space-y-4">
           {/* Profile Section */}
           {filterSections("profile") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={User}
                 title="Profile"
@@ -358,7 +361,7 @@ const SettingsPage = () => {
 
           {/* Notifications & Sounds */}
           {filterSections("notifications") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={Bell}
                 title="Notifications & Sounds"
@@ -417,7 +420,7 @@ const SettingsPage = () => {
 
           {/* Appearance */}
           {filterSections("appearance") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={Palette}
                 title="Appearance"
@@ -465,7 +468,7 @@ const SettingsPage = () => {
 
           {/* Privacy */}
           {filterSections("privacy") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader icon={Lock} title="Privacy" section="privacy" />
               {expandedSections.privacy && (
                 <div className="p-4 space-y-1">
@@ -510,7 +513,7 @@ const SettingsPage = () => {
 
           {/* Chat Settings */}
           {filterSections("chat") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={MessageSquare}
                 title="Chat Settings"
@@ -561,7 +564,7 @@ const SettingsPage = () => {
 
           {/* Data & Storage */}
           {filterSections("data") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={Download}
                 title="Data & Storage"
@@ -608,7 +611,7 @@ const SettingsPage = () => {
 
           {/* Accessibility */}
           {filterSections("accessibility") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={Accessibility}
                 title="Accessibility"
@@ -647,7 +650,7 @@ const SettingsPage = () => {
 
           {/* Language & Region */}
           {filterSections("language") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={Globe}
                 title="Language & Region"
@@ -680,7 +683,7 @@ const SettingsPage = () => {
 
           {/* Advanced */}
           {filterSections("advanced") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader icon={Code} title="Advanced" section="advanced" />
               {expandedSections.advanced && (
                 <div className="p-4 space-y-1">
@@ -710,21 +713,23 @@ const SettingsPage = () => {
       </div>
 
       {/* Fixed Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-        <div className="max-w-4xl mx-auto p-4 space-y-2">
-          <button
-            onClick={handleResetSettings}
-            className="w-full flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-black dark:text-white font-semibold py-3 px-4 rounded-lg transition-colors"
-          >
-            <RotateCcw className="w-5 h-5" />
-            Reset to Defaults
-          </button>
-          <button
-            onClick={logout}
-            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-          >
-            Logout
-          </button>
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30">
+        <div className="w-full px-4 lg:px-8 py-4">
+          <div className="max-w-7xl mx-auto space-y-2">
+            <button
+              onClick={handleResetSettings}
+              className="w-full flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-black dark:text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+            >
+              <RotateCcw className="w-5 h-5" />
+              Reset to Defaults
+            </button>
+            <button
+              onClick={logout}
+              className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     </div>
