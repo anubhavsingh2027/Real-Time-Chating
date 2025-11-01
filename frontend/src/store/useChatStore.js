@@ -67,12 +67,14 @@ export const useChatStore = create(
           receiverId: selectedUser._id,
           text: messageData.text,
           image: messageData.image,
-          replyTo: replyToMessage ? {
-            _id: replyToMessage._id,
-            text: replyToMessage.text,
-            image: replyToMessage.image,
-            senderId: replyToMessage.senderId,
-          } : null,
+          replyTo: replyToMessage
+            ? {
+                _id: replyToMessage._id,
+                text: replyToMessage.text,
+                image: replyToMessage.image,
+                senderId: replyToMessage.senderId,
+              }
+            : null,
           createdAt: new Date().toISOString(),
           isOptimistic: true,
         };
@@ -84,7 +86,10 @@ export const useChatStore = create(
             ...messageData,
             replyTo: replyToMessage?._id || null,
           };
-          const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, payload);
+          const res = await axiosInstance.post(
+            `/messages/send/${selectedUser._id}`,
+            payload
+          );
           const actualMessage = res.data;
 
           // Clear reply after sending
@@ -92,7 +97,9 @@ export const useChatStore = create(
 
           // Update messages, replacing optimistic with actual
           set((state) => ({
-            messages: state.messages.map((msg) => (msg._id === tempId ? actualMessage : msg)),
+            messages: state.messages.map((msg) =>
+              msg._id === tempId ? actualMessage : msg
+            ),
           }));
 
           // Emit the message through socket for real-time update
@@ -108,7 +115,9 @@ export const useChatStore = create(
             messages: state.messages.filter((msg) => msg._id !== tempId),
           }));
 
-          const errorMsg = error.response?.data?.message || "Error sending message. Please try again.";
+          const errorMsg =
+            error.response?.data?.message ||
+            "Error sending message. Please try again.";
           toast.error(errorMsg);
 
           if (errorMsg.includes("10 MB")) {
@@ -139,14 +148,17 @@ export const useChatStore = create(
 
           toast.success("Message deleted");
         } catch (error) {
-          const errorMsg = error.response?.data?.error || "Failed to delete message";
+          const errorMsg =
+            error.response?.data?.error || "Failed to delete message";
           toast.error(errorMsg);
         }
       },
 
       addReaction: async (messageId, emoji) => {
         try {
-          await axiosInstance.post(`/messages/${messageId}/reaction`, { emoji });
+          await axiosInstance.post(`/messages/${messageId}/reaction`, {
+            emoji,
+          });
 
           // Update local state
           set((state) => ({
@@ -169,7 +181,8 @@ export const useChatStore = create(
             ),
           }));
         } catch (error) {
-          const errorMsg = error.response?.data?.error || "Failed to add reaction";
+          const errorMsg =
+            error.response?.data?.error || "Failed to add reaction";
           toast.error(errorMsg);
         }
       },
@@ -192,7 +205,8 @@ export const useChatStore = create(
             ),
           }));
         } catch (error) {
-          const errorMsg = error.response?.data?.error || "Failed to remove reaction";
+          const errorMsg =
+            error.response?.data?.error || "Failed to remove reaction";
           toast.error(errorMsg);
         }
       },
@@ -222,8 +236,10 @@ export const useChatStore = create(
 
           // Only process messages relevant to the current chat
           const isRelevantMessage =
-            (newMessage.senderId === selectedUser._id && newMessage.receiverId === authUser._id) ||
-            (newMessage.senderId === authUser._id && newMessage.receiverId === selectedUser._id);
+            (newMessage.senderId === selectedUser._id &&
+              newMessage.receiverId === authUser._id) ||
+            (newMessage.senderId === authUser._id &&
+              newMessage.receiverId === selectedUser._id);
 
           if (!isRelevantMessage) return;
 
@@ -232,7 +248,9 @@ export const useChatStore = create(
             const messageExists = state.messages.some(
               (msg) =>
                 msg._id === newMessage._id ||
-                (msg.isOptimistic && msg.text === newMessage.text && msg.createdAt === newMessage.createdAt)
+                (msg.isOptimistic &&
+                  msg.text === newMessage.text &&
+                  msg.createdAt === newMessage.createdAt)
             );
 
             if (messageExists) return state;
@@ -265,7 +283,9 @@ export const useChatStore = create(
                 ? {
                     ...msg,
                     reactions: [
-                      ...(msg.reactions || []).filter((r) => r.userId !== userId),
+                      ...(msg.reactions || []).filter(
+                        (r) => r.userId !== userId
+                      ),
                       { userId, emoji, createdAt: new Date().toISOString() },
                     ],
                   }
@@ -281,7 +301,9 @@ export const useChatStore = create(
               msg._id === messageId
                 ? {
                     ...msg,
-                    reactions: (msg.reactions || []).filter((r) => r.userId !== userId),
+                    reactions: (msg.reactions || []).filter(
+                      (r) => r.userId !== userId
+                    ),
                   }
                 : msg
             ),

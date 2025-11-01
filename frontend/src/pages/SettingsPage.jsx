@@ -145,16 +145,16 @@ const SettingsPage = () => {
   const SectionHeader = ({ icon: Icon, title, section }) => (
     <button
       onClick={() => toggleSection(section)}
-      className="flex items-center justify-between w-full p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+      className="flex items-center justify-between w-full p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Icon className="w-5 h-5 text-blue-500" />
-        <h3 className="text-base font-semibold">{title}</h3>
+        <h3 className="text-sm sm:text-base font-semibold">{title}</h3>
       </div>
       {expandedSections[section] ? (
-        <ChevronDown className="w-5 h-5" />
+        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
       ) : (
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
       )}
     </button>
   );
@@ -206,10 +206,10 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
+    <div className="min-h-screen w-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40">
-        <div className="w-full px-4 lg:px-8">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
               <button
@@ -224,7 +224,7 @@ const SettingsPage = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">Settings</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                     {authUser?.fullName}
                   </p>
                 </div>
@@ -234,7 +234,7 @@ const SettingsPage = () => {
 
           {/* Search Bar */}
           <div className="pb-4">
-            <div className="relative">
+            <div className="relative max-w-3xl mx-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               <input
                 type="text"
@@ -249,9 +249,9 @@ const SettingsPage = () => {
       </div>
 
       {/* Settings Content */}
-      <div className="w-full px-6 lg:px-12 xl:px-24 py-6 pb-32">
-        {/* Make settings use full available width (not constrained to a centered max-width) */}
-        <div className="w-full mx-auto space-y-6 max-w-none">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 pb-32">
+        {/* Settings sections in a responsive grid */}
+        <div className="w-full mx-auto space-y-4 sm:space-y-6 max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Profile Section */}
           {filterSections("profile") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
@@ -433,18 +433,18 @@ const SettingsPage = () => {
 
       {/* Fixed Footer Actions */}
       <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30">
-        <div className="w-full px-4 lg:px-8 py-4">
-          <div className="max-w-7xl mx-auto space-y-2">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={handleResetSettings}
-              className="w-full flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-black dark:text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-black dark:text-white font-semibold py-2.5 sm:py-3 px-4 rounded-lg transition-colors text-sm sm:text-base"
             >
-              <RotateCcw className="w-5 h-5" />
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
               Reset to Defaults
             </button>
             <button
               onClick={logout}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+              className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 sm:py-3 px-4 rounded-lg transition-colors text-sm sm:text-base"
             >
               Logout
             </button>
