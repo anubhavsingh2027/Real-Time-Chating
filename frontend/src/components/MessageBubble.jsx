@@ -206,63 +206,38 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Message bubble with WhatsApp-style tail */}
         <div
-          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 transition-all duration-200 ${
+          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
             isOwnMessage
-              ? 'bg-[#00a884] text-white ml-auto'
-              : 'bg-[#202c33] text-slate-100'
+              ? 'bg-emerald-500 text-white rounded-tr-[4px]'
+              : 'bg-slate-700 text-slate-100 rounded-tl-[4px]'
           }`}
+          style={{
+            position: 'relative',
+          }}
         >
-          {/* WhatsApp-style tail using ::before pseudo-element */}
+          {/* WhatsApp-style tail using ::after pseudo-element */}
           <style>{`
-            .message-bubble {
-              position: relative;
-              max-width: 85%;
-              border-radius: 12px;
-            }
-
-            .message-bubble::before {
+            .message-bubble::after {
               content: '';
               position: absolute;
-              top: 50%;
-              transform: translateY(-50%);
-              width: 10px;
-              height: 20px;
+              top: 0;
+              width: 0;
+              height: 0;
+              border-style: solid;
             }
 
-            /* Sender message (right side) */
-            .message-bubble.bg-\[#00a884\] {
-              border-bottom-right-radius: 12px;
-              border-top-right-radius: 0;
-              border-top-left-radius: 12px;
-              border-bottom-left-radius: 12px;
-            }
-            
-            .message-bubble.bg-\[#00a884\]::before {
-              right: -10px;
-              background: #00a884;
-              clip-path: polygon(0 50%, 0 0, 100% 0, 100% 100%, 0 100%);
-              transform: translateY(-50%) skewX(-10deg);
+            /* Sender message tail (right side) */
+            .message-bubble.bg-emerald-500::after {
+              right: -8px;
+              border-width: 0 0 12px 8px;
+              border-color: transparent transparent transparent rgb(16 185 129);
             }
 
-            /* Receiver message (left side) */
-            .message-bubble.bg-\[#202c33\] {
-              border-bottom-left-radius: 12px;
-              border-top-left-radius: 0;
-              border-top-right-radius: 12px;
-              border-bottom-right-radius: 12px;
-            }
-
-            .message-bubble.bg-\[#202c33\]::before {
-              left: -10px;
-              background: #202c33;
-              clip-path: polygon(100% 50%, 100% 0, 0 0, 0 100%, 100% 100%);
-              transform: translateY(-50%) skewX(10deg);
-            }
-
-            @media (min-width: 768px) {
-              .message-bubble {
-                max-width: 65%;
-              }
+            /* Receiver message tail (left side) */
+            .message-bubble.bg-slate-700::after {
+              left: -8px;
+              border-width: 0 8px 12px 0;
+              border-color: transparent rgb(51 65 85) transparent transparent;
             }
           `}</style>
 
