@@ -263,8 +263,9 @@ const SettingsPage = () => {
       </div>
 
       {/* Settings Content */}
-      <div className="w-full px-4 lg:px-8 py-6 pb-32">
-        <div className="max-w-7xl mx-auto space-y-4">
+      <div className="w-full px-6 lg:px-12 xl:px-24 py-6 pb-32">
+        {/* Make settings use full available width (not constrained to a centered max-width) */}
+        <div className="w-full mx-auto space-y-6 max-w-none">
           {/* Profile Section */}
           {filterSections("profile") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
