@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Copy, Check, Download, ZoomIn, Trash2, Reply, Forward, Heart, ThumbsUp, Smile } from 'lucide-react';
+import { ChevronDown, Copy, Check, Download, ZoomIn, Trash2, Smile } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useLayoutEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
@@ -9,9 +9,7 @@ function MessageBubble({
   message,
   isOwnMessage,
   messageStatus = 'sent',
-  onReply,
-  onDelete,
-  onForward
+  onDelete
 }) {
   const [showActions, setShowActions] = useState(false);
   const [isLongPress, setIsLongPress] = useState(false);
@@ -82,30 +80,12 @@ function MessageBubble({
     setShowActions(false);
   };
 
-  const handleReply = () => {
-    if (onReply) {
-      onReply(message);
-      toast.success('Reply to message set');
-    }
-    setShowActions(false);
-    setIsLongPress(false);
-  };
-
   const handleDelete = () => {
     if (onDelete) {
       if (window.confirm('Are you sure you want to delete this message?')) {
         onDelete(message._id);
         toast.success('Message deleted');
       }
-    }
-    setShowActions(false);
-    setIsLongPress(false);
-  };
-
-  const handleForward = () => {
-    if (onForward) {
-      onForward(message);
-      toast.success('Message ready to forward');
     }
     setShowActions(false);
     setIsLongPress(false);
@@ -275,14 +255,6 @@ function MessageBubble({
                   )}
                 </div>
 
-                <button
-                  onClick={handleReply}
-                  className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                >
-                  <Reply className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                  <span className="text-black dark:text-white">Reply</span>
-                </button>
-
                 {message.text && (
                   <button
                     onClick={handleCopyMessage}
@@ -311,14 +283,6 @@ function MessageBubble({
                     </button>
                   </>
                 )}
-
-                <button
-                  onClick={handleForward}
-                  className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                >
-                  <Forward className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                  <span className="text-black dark:text-white">Forward</span>
-                </button>
 
                 {isOwnMessage && (
                   <button

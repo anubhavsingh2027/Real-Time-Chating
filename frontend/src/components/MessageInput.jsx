@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import useKeyboardSound from "../hooks/useKeyboardSound";
 import { useChatStore } from "../store/useChatStore";
 import toast from "react-hot-toast";
-import { ImageIcon, SendIcon, XIcon, PlusIcon, FileIcon, Reply } from "lucide-react";
+import { ImageIcon, SendIcon, XIcon, PlusIcon, FileIcon } from "lucide-react";
 
 function MessageInput() {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
@@ -11,7 +11,7 @@ function MessageInput() {
 
   const fileInputRef = useRef(null);
 
-  const { sendMessage, isSoundEnabled, replyToMessage, clearReplyToMessage } = useChatStore();
+  const { sendMessage, isSoundEnabled } = useChatStore();
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -83,38 +83,7 @@ function MessageInput() {
 
   return (
     <div className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700">
-      {/* Reply Preview */}
-      {replyToMessage && (
-        <div className="px-3 pt-3 border-b border-gray-200 dark:border-slate-700">
-          <div className="max-w-3xl mx-auto bg-gray-100 dark:bg-slate-700 rounded-lg p-3 flex items-start gap-3">
-            <Reply className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                Replying to message
-              </p>
-              {replyToMessage.image && (
-                <img
-                  src={replyToMessage.image}
-                  alt="Reply preview"
-                  className="w-12 h-12 rounded object-cover mb-1"
-                />
-              )}
-              {replyToMessage.text && (
-                <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                  {replyToMessage.text}
-                </p>
-              )}
-            </div>
-            <button
-              onClick={clearReplyToMessage}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full transition-colors flex-shrink-0"
-              type="button"
-            >
-              <XIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {/* Image Previews */}
       {imagePreviews.length > 0 && (

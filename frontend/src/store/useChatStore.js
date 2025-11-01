@@ -17,15 +17,9 @@ export const useChatStore = create(
       isUsersLoading: false,
       isMessagesLoading: false,
       isSoundEnabled: useSettingsStore.getState().soundEffects,
-      replyToMessage: null,
-      forwardMessage: null,
 
       setActiveTab: (tab) => set({ activeTab: tab }),
       setSelectedUser: (selectedUser) => set({ selectedUser }),
-      setReplyToMessage: (message) => set({ replyToMessage: message }),
-      clearReplyToMessage: () => set({ replyToMessage: null }),
-      setForwardMessage: (message) => set({ forwardMessage: message }),
-      clearForwardMessage: () => set({ forwardMessage: null }),
 
       getAllContacts: async () => {
         set({ isUsersLoading: true });

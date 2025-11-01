@@ -5,17 +5,9 @@ import {
   ChevronDown,
   ChevronRight,
   Bell,
-  Volume2,
-  Eye,
-  Lock,
-  MessageSquare,
-  Download,
-  Accessibility,
-  Globe,
-  Code,
+  Palette,
   RotateCcw,
   Search,
-  Palette,
   Settings as SettingsIcon,
   Camera,
   User,
@@ -37,13 +29,7 @@ const SettingsPage = () => {
   const [expandedSections, setExpandedSections] = useState({
     profile: true,
     notifications: false,
-    appearance: false,
-    privacy: false,
-    chat: false,
-    data: false,
-    accessibility: false,
-    language: false,
-    advanced: false,
+    appearance: false
   });
 
   const toggleSection = (section) => {
@@ -365,7 +351,7 @@ const SettingsPage = () => {
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
               <SectionHeader
                 icon={Bell}
-                title="Notifications & Sounds"
+                title="Notifications"
                 section="notifications"
               />
               {expandedSections.notifications && (
@@ -382,38 +368,6 @@ const SettingsPage = () => {
                     label="Desktop Notifications"
                     description="Show notifications on your desktop"
                   />
-                  <ToggleSwitch
-                    checked={settings.notificationPreview}
-                    onChange={settings.toggleNotificationPreview}
-                    label="Notification Preview"
-                    description="Show message preview in notifications"
-                  />
-                  <ToggleSwitch
-                    checked={settings.soundEffects}
-                    onChange={settings.toggleSoundEffects}
-                    label="Sound Effects"
-                    description="Play sound effects for interactions"
-                  />
-                  <ToggleSwitch
-                    checked={settings.messageSound}
-                    onChange={settings.toggleMessageSound}
-                    label="Message Sound"
-                    description="Play sound when receiving messages"
-                  />
-                  <ToggleSwitch
-                    checked={settings.notificationSound}
-                    onChange={settings.toggleNotificationSound}
-                    label="Notification Sound"
-                    description="Play sound for notifications"
-                  />
-                  <div className="pt-3">
-                    <Select
-                      label="Keyboard Sound"
-                      value={settings.keyboardSound}
-                      onChange={(e) => settings.setKeyboardSound(e.target.value)}
-                      options={keyboardSoundOptions}
-                    />
-                  </div>
                 </div>
               )}
             </div>
@@ -461,102 +415,6 @@ const SettingsPage = () => {
                     onChange={settings.toggleAnimations}
                     label="Animations"
                     description="Enable smooth animations and transitions"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Privacy */}
-          {filterSections("privacy") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <SectionHeader icon={Lock} title="Privacy" section="privacy" />
-              {expandedSections.privacy && (
-                <div className="p-4 space-y-1">
-                  <ToggleSwitch
-                    checked={settings.onlineStatus}
-                    onChange={settings.toggleOnlineStatus}
-                    label="Online Status"
-                    description="Show when you're online to others"
-                  />
-                  <ToggleSwitch
-                    checked={settings.lastSeenStatus}
-                    onChange={settings.toggleLastSeenStatus}
-                    label="Last Seen"
-                    description="Show your last seen time"
-                  />
-                  <ToggleSwitch
-                    checked={settings.readReceipts}
-                    onChange={settings.toggleReadReceipts}
-                    label="Read Receipts"
-                    description="Send read receipts when you view messages"
-                  />
-                  <ToggleSwitch
-                    checked={settings.typingIndicator}
-                    onChange={settings.toggleTypingIndicator}
-                    label="Typing Indicator"
-                    description="Show when you're typing"
-                  />
-                  <div className="pt-3">
-                    <Select
-                      label="Profile Photo Visibility"
-                      value={settings.profilePhotoVisibility}
-                      onChange={(e) =>
-                        settings.setProfilePhotoVisibility(e.target.value)
-                      }
-                      options={profilePhotoVisibilityOptions}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Chat Settings */}
-          {filterSections("chat") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <SectionHeader
-                icon={MessageSquare}
-                title="Chat Settings"
-                section="chat"
-              />
-              {expandedSections.chat && (
-                <div className="p-4 space-y-1">
-                  <ToggleSwitch
-                    checked={settings.enterToSend}
-                    onChange={settings.toggleEnterToSend}
-                    label="Enter to Send"
-                    description="Press Enter to send messages (Shift+Enter for new line)"
-                  />
-                  <ToggleSwitch
-                    checked={settings.showTimestamps}
-                    onChange={settings.toggleShowTimestamps}
-                    label="Show Timestamps"
-                    description="Display time on messages"
-                  />
-                  <ToggleSwitch
-                    checked={settings.showMessageStatus}
-                    onChange={settings.toggleShowMessageStatus}
-                    label="Message Status"
-                    description="Show sent, delivered, and read status"
-                  />
-                  <ToggleSwitch
-                    checked={settings.groupMessagesByDate}
-                    onChange={settings.toggleGroupMessagesByDate}
-                    label="Group Messages by Date"
-                    description="Show date separators between messages"
-                  />
-                  <ToggleSwitch
-                    checked={settings.showSenderName}
-                    onChange={settings.toggleShowSenderName}
-                    label="Show Sender Name"
-                    description="Display sender name in group chats"
-                  />
-                  <ToggleSwitch
-                    checked={settings.autoScroll}
-                    onChange={settings.toggleAutoScroll}
-                    label="Auto-scroll"
-                    description="Automatically scroll to new messages"
                   />
                 </div>
               )}
