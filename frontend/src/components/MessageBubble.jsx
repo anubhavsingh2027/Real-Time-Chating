@@ -155,7 +155,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
         </div>
 
         {/* Reaction / options button (compact) */}
-        <div className={`relative ${isOwnMessage ? 'right-0' : 'left-0'} mt-1`}> 
+        <div className={`relative ${isOwnMessage ? 'right-0' : 'left-0'} mt-1`}>
           <button
             onClick={() => setShowActions((s) => !s)}
             className="-translate-y-2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-colors"
@@ -165,7 +165,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
           </button>
 
           {showActions && (
-            <div className={`absolute z-50 ${isOwnMessage ? 'right-0' : 'left-0'} mt-2`}> 
+            <div className={`absolute z-50 ${isOwnMessage ? 'right-0' : 'left-0'} mt-2`}>
               <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 w-40">
                 <div className="flex flex-col">
                   <button onClick={handleCopyMessage} className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2">
