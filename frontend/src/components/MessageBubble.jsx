@@ -13,8 +13,6 @@ import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 
 function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete }) {
-  // Custom toast state for bottom-center reaction feedback
-  const [reactionToast, setReactionToast] = useState(null);
   const [showActions, setShowActions] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showMenuButton, setShowMenuButton] = useState(false);
@@ -103,10 +101,9 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   const handleReaction = async (emoji) => {
     try {
       await addReaction(message._id, emoji);
+      // show success feedback and close menu
+      toast.success(`Reacted with ${emoji}`);
       setShowActions(false);
-      // Show custom bottom-center toast
-      setReactionToast(emoji);
-      setTimeout(() => setReactionToast(null), 2000);
     } catch (err) {
       console.error(err);
     }
@@ -168,32 +165,6 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
     ? 'bg-emerald-500 text-white'
     : 'bg-gray-800 text-gray-100 dark:bg-slate-700 dark:text-slate-100';
 
-  // --- Bubble arrow style ---
-  const arrowSize = 16;
-  // We'll render the arrow element inline in the JSX so it can be positioned
-  // relative to the bubble. arrowSize is used to compute offsets.
-  const arrowSizePx = 12; // visual size (square rotated)
-
-  // --- Popup dynamic positioning ---
-  const [popupPos, setPopupPos] = useState('below');
-  useEffect(() => {
-    if (!showActions) return;
-    const bubble = bubbleRef.current;
-    if (!bubble) return;
-    const rect = bubble.getBoundingClientRect();
-    const spaceAbove = rect.top;
-    const spaceBelow = window.innerHeight - rect.bottom;
-    setPopupPos(spaceBelow < 180 && spaceAbove > spaceBelow ? 'above' : 'below');
-  }, [showActions]);
-
-  // --- CSS variables for theme consistency ---
-  const rootVars = {
-    '--popup-bg': 'var(--popup-bg, #fff)',
-    '--popup-shadow': 'var(--popup-shadow, 0 4px 24px 0 rgba(0,0,0,0.12))',
-    '--toast-bg': 'var(--toast-bg, #222c)',
-    '--bubble-bg': isOwnMessage ? '#10b981' : '#1e293b',
-  };
-
   return (
     <div
       className={`w-full flex ${containerAlign} mb-2 px-3`}
@@ -202,184 +173,128 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      style={rootVars}
     >
       <div className="relative max-w-[85%] flex flex-col items-end">
-        <div className="relative">
-          {/* Bubble arrow (rotated square) */}
-          <div
-            aria-hidden
-            style={{
-              position: 'absolute',
-              top: 12,
-              width: arrowSizePx,
-              height: arrowSizePx,
-              transform: 'rotate(45deg)',
-              boxShadow: isOwnMessage ? '2px 2px 6px rgba(0,0,0,0.08)' : '-2px 2px 6px rgba(0,0,0,0.08)',
-              right: isOwnMessage ? -(arrowSizePx / 2) : 'auto',
-              left: !isOwnMessage ? -(arrowSizePx / 2) : 'auto',
-              background: isOwnMessage ? 'var(--bubble-bg, #10b981)' : 'var(--bubble-bg, #1e293b)',
-              zIndex: 0,
-              borderRadius: 2,
-            }}
-          />
-          <div
-            className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
-              isOwnMessage ? 'rounded-tr-2xl rounded-br-none' : 'rounded-tl-2xl rounded-bl-none'
-            } ${bubbleBackground} bg-opacity-95 z-10`}
-          >
-            {/* Image (if present) */}
-            {message.image && (
-              <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
-                <img
-                  ref={imageRef}
-                  src={message.image}
-                  alt={message.text ? 'attachment' : 'image'}
-                  onClick={() => setShowImageModal(true)}
-                  onError={(e) => (e.currentTarget.style.display = 'none')}
-                  className="w-auto h-auto max-w-full max-h-[60vh] object-contain cursor-pointer block"
-                />
-              </div>
-            )}
-
-            {/* Text */}
-            {message.text && (
-              <div className="text-sm leading-5 break-words whitespace-pre-wrap">
-                <span className="block">{message.text}</span>
-              </div>
-            )}
-
-            {/* Timestamp + status */}
-            <div className="flex items-center gap-2 self-end mt-0.5">
-              <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`}>
-                {message.createdAt
-                  ? new Date(message.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
-                  : ''}
-              </time>
-              {isOwnMessage && <div className="flex items-center">{getStatusIcon()}</div>}
+        <div
+          className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
+            isOwnMessage ? 'rounded-tr-2xl rounded-br-none' : 'rounded-tl-2xl rounded-bl-none'
+          } ${bubbleBackground} bg-opacity-95`}
+        >
+          {/* Image (if present) */}
+          {message.image && (
+            <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
+              <img
+                ref={imageRef}
+                src={message.image}
+                alt={message.text ? 'attachment' : 'image'}
+                onClick={() => setShowImageModal(true)}
+                onError={(e) => (e.currentTarget.style.display = 'none')}
+                className="w-auto h-auto max-w-full max-h-[60vh] object-contain cursor-pointer block"
+              />
             </div>
+          )}
+
+          {/* Text */}
+          {message.text && (
+            <div className="text-sm leading-5 break-words whitespace-pre-wrap">
+              <span className="block">{message.text}</span>
+            </div>
+          )}
+
+          {/* Timestamp + status */}
+          <div className="flex items-center gap-2 self-end mt-0.5">
+            <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`}>
+              {message.createdAt
+                ? new Date(message.createdAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : ''}
+            </time>
+            {isOwnMessage && <div className="flex items-center">{getStatusIcon()}</div>}
           </div>
         </div>
 
         {/* Reaction / options button (hover or long press) */}
         <div
-          className={`absolute top-0 ${isOwnMessage ? 'right-0' : 'left-0'} transform translate-y-[-8px] transition-opacity duration-200 ${
+          className={`absolute top-0 right-0 transform translate-y-[-8px] transition-opacity duration-200 ${
             showMenuButton ? 'opacity-100 visible' : 'opacity-0 invisible'
           }`}
         >
-          <button
-            onClick={() => {
-              const next = !showActions;
-              setShowActions(next);
-              setShowMenuButton(true);
-              if (next) {
-                // notify others to close
-                window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
-              }
-            }}
-            className={`-translate-y-1 p-1.5 rounded-full transition-all duration-150 focus:outline-none ${
-              isOwnMessage ? 'bg-emerald-600/20 hover:bg-emerald-600/30' : 'bg-white/10 hover:bg-white/20'
-            }`}
-            aria-label="message actions"
-          >
-            <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/90' : 'text-gray-300'}`} />
-          </button>
-
-          {/* Menu panel, dynamic position */}
-          {showActions && (
-            <div
-              className={`fixed z-50`}
-              style={{
-                // compute popup placement and clamp to viewport
-                left: (() => {
-                  const rect = bubbleRef.current?.getBoundingClientRect();
-                  const popupW = 220;
-                  if (!rect) return 8;
-                  const preferred = isOwnMessage ? rect.right - popupW + 12 : rect.left - 12;
-                  const min = 8;
-                  const max = window.innerWidth - popupW - 8;
-                  return Math.max(min, Math.min(preferred, max));
-                })(),
-                top: (() => {
-                  const rect = bubbleRef.current?.getBoundingClientRect();
-                  const popupH = 140;
-                  if (!rect) return 8;
-                  if (popupPos === 'above') {
-                    // place above the bubble with small gap
-                    return Math.max(8, rect.top - popupH - 8);
-                  }
-                  // place below
-                  return Math.min(window.innerHeight - 48, rect.bottom + 8);
-                })(),
-                minWidth: 180,
-                maxWidth: 240,
+          <div className="flex items-start">
+            <button
+              onClick={() => {
+                const next = !showActions;
+                setShowActions(next);
+                setShowMenuButton(true);
+                if (next) {
+                  // notify others to close
+                  window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
+                }
               }}
+              className={`-translate-y-1 p-1.5 rounded-full transition-all duration-150 focus:outline-none ${
+                isOwnMessage ? 'bg-emerald-600/20 hover:bg-emerald-600/30' : 'bg-white/10 hover:bg-white/20'
+              }`}
+              aria-label="message actions"
             >
+              <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/90' : 'text-gray-300'}`} />
+            </button>
+
+            {/* Menu panel */}
+            <div className={`ml-2 relative`}>
               <div
-                className={`rounded-[13px] shadow-lg py-2 px-2 backdrop-blur-sm border border-black/5 dark:border-white/10 transition-all duration-200 scale-100 opacity-100 bg-[var(--popup-bg)]`}
-                style={{
-                  boxShadow: 'var(--popup-shadow)',
-                  background: 'var(--popup-bg)',
-                  padding: 12,
-                  minWidth: 180,
-                  maxWidth: 240,
-                  transformOrigin: isOwnMessage ? 'top right' : 'top left',
-                }}
+                className={`transform origin-top-right transition-all duration-150 ease-out ${
+                  showActions ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
+                }`}
               >
-                {/* Copy */}
-                <button
-                  onClick={handleCopyMessage}
-                  className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
-                >
-                  <Copy className="w-4 h-4 text-gray-500" />
-                  Copy
-                </button>
-                {/* Emoji row */}
-                <div className="flex items-center justify-between gap-1 px-1 mt-2 mb-1">
-                  {reactions.map((r) => (
+                <div className="rounded-lg shadow-lg py-2 w-44 backdrop-blur-sm bg-white/95 dark:bg-black/70 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/5">
+                  {/* Copy */}
+                  <div className="px-2">
                     <button
-                      key={r}
-                      onClick={() => handleReaction(r)}
-                      className="text-lg p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                      title={r}
-                      style={{ fontSize: 22 }}
+                      onClick={() => {
+                        handleCopyMessage();
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
                     >
-                      {r}
+                      <Copy className="w-4 h-4 text-gray-500" />
+                      Copy
                     </button>
-                  ))}
+                  </div>
+
+                  {/* Emoji row */}
+                  <div className="px-2 pt-1">
+                    <div className="flex items-center justify-between gap-1 px-1">
+                      {reactions.map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => handleReaction(r)}
+                          className="text-lg p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                          title={r}
+                        >
+                          {r}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-2 border-t border-gray-100 dark:border-white/5" />
+
+                  {/* Delete */}
+                  {isOwnMessage && (
+                    <div className="px-2 mt-1">
+                      <button
+                        onClick={handleDelete}
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-2 border-t border-gray-100 dark:border-white/5" />
-                {/* Delete */}
-                {isOwnMessage && (
-                  <button
-                    onClick={handleDelete}
-                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors mt-1"
-                  >
-                    <Trash2 className="w-4 h-4" /> Delete
-                  </button>
-                )}
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Custom bottom-center reaction toast */}
-        {reactionToast && (
-          <div
-            className="fixed left-1/2 bottom-8 z-[9999] px-4 py-2 rounded-lg text-white text-base font-medium shadow-lg animate-fadeout"
-            style={{
-              background: 'var(--toast-bg)',
-              transform: 'translateX(-50%)',
-              transition: 'opacity 0.4s',
-              opacity: reactionToast ? 1 : 0,
-            }}
-          >
-            Reacted with {reactionToast}
           </div>
-        )}
+        </div>
 
         {/* Reactions preview */}
         {message.reactions && message.reactions.length > 0 && (
