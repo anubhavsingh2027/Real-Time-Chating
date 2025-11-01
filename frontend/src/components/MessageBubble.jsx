@@ -170,31 +170,9 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
   // --- Bubble arrow style ---
   const arrowSize = 16;
-  const arrowStyle = isOwnMessage
-    ? {
-        right: -arrowSize + 2,
-        top: 12,
-        width: arrowSize,
-        height: arrowSize,
-        position: 'absolute',
-        zIndex: 1,
-        background: 'var(--bubble-bg, #10b981)',
-        clipPath:
-          'polygon(0 0, 100% 50%, 0 100%)',
-        boxShadow: '2px 2px 6px 0 rgba(0,0,0,0.08)',
-      }
-    : {
-        left: -arrowSize + 2,
-        top: 12,
-        width: arrowSize,
-        height: arrowSize,
-        position: 'absolute',
-        zIndex: 1,
-        background: 'var(--bubble-bg, #1e293b)',
-        clipPath:
-          'polygon(100% 0, 0 50%, 100% 100%)',
-        boxShadow: '-2px 2px 6px 0 rgba(0,0,0,0.08)',
-      };
+  // We'll render the arrow element inline in the JSX so it can be positioned
+  // relative to the bubble. arrowSize is used to compute offsets.
+  const arrowSizePx = 12; // visual size (square rotated)
 
   // --- Popup dynamic positioning ---
   const [popupPos, setPopupPos] = useState('below');
@@ -228,12 +206,27 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
     >
       <div className="relative max-w-[85%] flex flex-col items-end">
         <div className="relative">
-          {/* Bubble arrow */}
-          <div style={arrowStyle} />
+          {/* Bubble arrow (rotated square) */}
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              top: 12,
+              width: arrowSizePx,
+              height: arrowSizePx,
+              transform: 'rotate(45deg)',
+              boxShadow: isOwnMessage ? '2px 2px 6px rgba(0,0,0,0.08)' : '-2px 2px 6px rgba(0,0,0,0.08)',
+              right: isOwnMessage ? -(arrowSizePx / 2) : 'auto',
+              left: !isOwnMessage ? -(arrowSizePx / 2) : 'auto',
+              background: isOwnMessage ? 'var(--bubble-bg, #10b981)' : 'var(--bubble-bg, #1e293b)',
+              zIndex: 0,
+              borderRadius: 2,
+            }}
+          />
           <div
             className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
               isOwnMessage ? 'rounded-tr-2xl rounded-br-none' : 'rounded-tl-2xl rounded-bl-none'
-            } ${bubbleBackground} bg-opacity-95`}
+            } ${bubbleBackground} bg-opacity-95 z-10`}
           >
             {/* Image (if present) */}
             {message.image && (
@@ -300,16 +293,26 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             <div
               className={`fixed z-50`}
               style={{
+                // compute popup placement and clamp to viewport
                 left: (() => {
                   const rect = bubbleRef.current?.getBoundingClientRect();
-                  if (!rect) return 0;
-                  return isOwnMessage ? rect.right - 220 : rect.left;
+                  const popupW = 220;
+                  if (!rect) return 8;
+                  const preferred = isOwnMessage ? rect.right - popupW + 12 : rect.left - 12;
+                  const min = 8;
+                  const max = window.innerWidth - popupW - 8;
+                  return Math.max(min, Math.min(preferred, max));
                 })(),
                 top: (() => {
                   const rect = bubbleRef.current?.getBoundingClientRect();
-                  if (!rect) return 0;
-                  if (popupPos === 'above') return rect.top - 60;
-                  return rect.bottom + 8;
+                  const popupH = 140;
+                  if (!rect) return 8;
+                  if (popupPos === 'above') {
+                    // place above the bubble with small gap
+                    return Math.max(8, rect.top - popupH - 8);
+                  }
+                  // place below
+                  return Math.min(window.innerHeight - 48, rect.bottom + 8);
                 })(),
                 minWidth: 180,
                 maxWidth: 240,
@@ -323,6 +326,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
                   padding: 12,
                   minWidth: 180,
                   maxWidth: 240,
+                  transformOrigin: isOwnMessage ? 'top right' : 'top left',
                 }}
               >
                 {/* Copy */}
