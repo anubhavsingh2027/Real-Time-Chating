@@ -162,8 +162,8 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
   const containerAlign = isOwnMessage ? 'justify-end' : 'justify-start';
   const bubbleBackground = isOwnMessage
-    ? 'bg-emerald-500 text-white'
-    : 'bg-gray-800 text-gray-100 dark:bg-slate-700 dark:text-slate-100';
+    ? 'bg-emerald-500 text-white before:border-r-emerald-500'
+    : 'bg-gray-800 text-gray-100 dark:bg-slate-700 dark:text-slate-100 before:border-l-gray-800 dark:before:border-l-slate-700';
 
   return (
     <div
@@ -176,9 +176,14 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
     >
       <div className="relative max-w-[85%] flex flex-col items-end">
         <div
-          className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
-            isOwnMessage ? 'rounded-tr-2xl rounded-br-none' : 'rounded-tl-2xl rounded-bl-none'
-          } ${bubbleBackground} bg-opacity-95`}
+          className={`group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 
+            before:content-[''] before:absolute before:w-0 before:h-0 
+            before:border-[6px] before:border-transparent
+            ${isOwnMessage ? 
+              'rounded-tr-sm rounded-br-none before:-right-[11px] before:top-[6px] before:border-r-0' : 
+              'rounded-tl-sm rounded-bl-none before:-left-[11px] before:top-[6px] before:border-l-0'
+            } 
+            ${bubbleBackground} bg-opacity-95`}
         >
           {/* Image (if present) */}
           {message.image && (
@@ -217,8 +222,8 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Reaction / options button (hover or long press) */}
         <div
-          className={`absolute top-0 right-0 transform translate-y-[-8px] transition-opacity duration-200 ${
-            showMenuButton ? 'opacity-100 visible' : 'opacity-0 invisible'
+          className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} transform -translate-y-[42px] transition-all duration-200 ${
+            showMenuButton ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'
           }`}
         >
           <div className="flex items-start">
@@ -241,13 +246,13 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             </button>
 
             {/* Menu panel */}
-            <div className={`ml-2 relative`}>
+              <div className={`${isOwnMessage ? 'ml-2' : 'mr-2'} relative z-50`}>
               <div
-                className={`transform origin-top-right transition-all duration-150 ease-out ${
+                className={`transform ${isOwnMessage ? 'origin-top-left' : 'origin-top-right'} transition-all duration-150 ease-out ${
                   showActions ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
                 }`}
               >
-                <div className="rounded-lg shadow-lg py-2 w-44 backdrop-blur-sm bg-white/95 dark:bg-black/70 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/5">
+                <div className="rounded-xl shadow-lg py-2 w-52 backdrop-blur-sm bg-white/95 dark:bg-slate-800/95 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10">
                   {/* Copy */}
                   <div className="px-2">
                     <button
@@ -298,7 +303,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Reactions preview */}
         {message.reactions && message.reactions.length > 0 && (
-          <div className="absolute -bottom-2 right-2 bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-700 flex items-center gap-1 text-sm">
+          <div className={`absolute -bottom-2 ${isOwnMessage ? 'right-2' : 'left-2'} bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-700 flex items-center gap-1 text-sm`}>
             {message.reactions.slice(0, 3).map((r, i) => (
               <span key={i}>{r.emoji || r}</span>
             ))}
