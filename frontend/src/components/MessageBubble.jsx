@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Copy, Check, Download, ZoomIn, Trash2, Reply, Forward, Heart, ThumbsUp, Smile } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useLayoutEffect } from 'react';
+import { useChatStore } from '../store/useChatStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 function MessageBubble({
   message,
@@ -15,7 +17,8 @@ function MessageBubble({
   const [isLongPress, setIsLongPress] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
-  const [selectedReaction, setSelectedReaction] = useState(null);
+  const { addReaction, removeReaction } = useChatStore();
+  const { authUser } = useAuthStore();
   const longPressTimer = useRef(null);
   const bubbleRef = useRef(null);
   const messageTextRef = useRef(null);
@@ -108,10 +111,10 @@ function MessageBubble({
     setIsLongPress(false);
   };
 
-  const handleReaction = (reaction) => {
-    setSelectedReaction(reaction);
+  const handleReaction = async (reaction) => {
     setShowReactions(false);
-    toast.success(`Reacted with ${reaction.emoji}`);
+    setShowActions(false);
+    await addReaction(message._id, reaction.emoji);
   };
 
   const handleToggleMenu = (e) => {
@@ -190,7 +193,7 @@ function MessageBubble({
               <img
                 src={message.image}
                 alt="Shared"
-                className="rounded-lg max-w-sm w-auto cursor-pointer"
+                className="rounded-lg max-w-[200px] sm:max-w-[280px] w-auto max-h-[300px] object-cover cursor-pointer"
                 onClick={handleZoomImage}
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity rounded-lg flex items-center justify-center pointer-events-none">
@@ -213,9 +216,18 @@ function MessageBubble({
             {isOwnMessage && <div className="flex items-center transition-opacity duration-200">{getStatusIcon()}</div>}
           </div>
 
-          {selectedReaction && (
-            <div className="absolute -bottom-2 right-2 bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-600">
-              <span className="text-sm">{selectedReaction.emoji}</span>
+          {message.reactions && message.reactions.length > 0 && (
+            <div className="absolute -bottom-2 right-2 bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-600 flex items-center gap-1">
+              {message.reactions.slice(0, 3).map((reaction, idx) => (
+                <span key={`${reaction.userId}-${idx}`} className="text-sm">
+                  {reaction.emoji}
+                </span>
+              ))}
+              {message.reactions.length > 3 && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  +{message.reactions.length - 3}
+                </span>
+              )}
             </div>
           )}
 

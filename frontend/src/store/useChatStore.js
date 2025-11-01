@@ -150,6 +150,59 @@ export const useChatStore = create(
         }
       },
 
+      addReaction: async (messageId, emoji) => {
+        try {
+          await axiosInstance.post(`/messages/${messageId}/reaction`, { emoji });
+
+          // Update local state
+          set((state) => ({
+            messages: state.messages.map((msg) =>
+              msg._id === messageId
+                ? {
+                    ...msg,
+                    reactions: [
+                      ...(msg.reactions || []).filter(
+                        (r) => r.userId !== useAuthStore.getState().authUser._id
+                      ),
+                      {
+                        userId: useAuthStore.getState().authUser._id,
+                        emoji,
+                        createdAt: new Date().toISOString(),
+                      },
+                    ],
+                  }
+                : msg
+            ),
+          }));
+        } catch (error) {
+          const errorMsg = error.response?.data?.error || "Failed to add reaction";
+          toast.error(errorMsg);
+        }
+      },
+
+      removeReaction: async (messageId) => {
+        try {
+          await axiosInstance.delete(`/messages/${messageId}/reaction`);
+
+          // Update local state
+          set((state) => ({
+            messages: state.messages.map((msg) =>
+              msg._id === messageId
+                ? {
+                    ...msg,
+                    reactions: (msg.reactions || []).filter(
+                      (r) => r.userId !== useAuthStore.getState().authUser._id
+                    ),
+                  }
+                : msg
+            ),
+          }));
+        } catch (error) {
+          const errorMsg = error.response?.data?.error || "Failed to remove reaction";
+          toast.error(errorMsg);
+        }
+      },
+
       subscribeToMessages: () => {
         const { selectedUser } = get();
         const { soundEffects } = useSettingsStore.getState();
@@ -209,6 +262,37 @@ export const useChatStore = create(
             messages: state.messages.filter((msg) => msg._id !== messageId),
           }));
         });
+
+        // Listen for reactions
+        socket.on("messageReaction", ({ messageId, userId, emoji }) => {
+          set((state) => ({
+            messages: state.messages.map((msg) =>
+              msg._id === messageId
+                ? {
+                    ...msg,
+                    reactions: [
+                      ...(msg.reactions || []).filter((r) => r.userId !== userId),
+                      { userId, emoji, createdAt: new Date().toISOString() },
+                    ],
+                  }
+                : msg
+            ),
+          }));
+        });
+
+        // Listen for reaction removals
+        socket.on("messageReactionRemoved", ({ messageId, userId }) => {
+          set((state) => ({
+            messages: state.messages.map((msg) =>
+              msg._id === messageId
+                ? {
+                    ...msg,
+                    reactions: (msg.reactions || []).filter((r) => r.userId !== userId),
+                  }
+                : msg
+            ),
+          }));
+        });
       },
 
       unsubscribeFromMessages: () => {
@@ -216,6 +300,8 @@ export const useChatStore = create(
         socket.off("newMessage");
         socket.off("messageStatus");
         socket.off("messageDeleted");
+        socket.off("messageReaction");
+        socket.off("messageReactionRemoved");
       },
     }),
     {

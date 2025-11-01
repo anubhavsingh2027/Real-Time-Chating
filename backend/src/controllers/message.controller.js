@@ -34,7 +34,7 @@ export const getMessagesByUserId = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text, image, replyTo, forwardedFrom } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
@@ -61,9 +61,17 @@ export const sendMessage = async (req, res) => {
       receiverId,
       text,
       image: imageUrl,
+      replyTo: replyTo || null,
+      forwardedFrom: forwardedFrom || null,
     });
 
     await newMessage.save();
+
+    // Populate replyTo and forwardedFrom before sending
+    await newMessage.populate([
+      { path: 'replyTo', select: 'text image senderId' },
+      { path: 'forwardedFrom', select: 'text image senderId' },
+    ]);
 
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
@@ -72,6 +80,7 @@ export const sendMessage = async (req, res) => {
 
     res.status(201).json(newMessage);
   } catch (error) {
+    console.error("Error in sendMessage:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -142,6 +151,100 @@ export const deleteMessage = async (req, res) => {
     res.status(200).json({ message: "Message deleted successfully" });
   } catch (error) {
     console.error("Error in deleteMessage:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const addReaction = async (req, res) => {
+  try {
+    const { id: messageId } = req.params;
+    const { emoji } = req.body;
+    const loggedInUserId = req.user._id;
+
+    if (!emoji) {
+      return res.status(400).json({ error: "Emoji is required" });
+    }
+
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    // Check if user already reacted
+    const existingReaction = message.reactions.find(
+      (r) => r.userId.toString() === loggedInUserId.toString()
+    );
+
+    if (existingReaction) {
+      // Update existing reaction
+      existingReaction.emoji = emoji;
+      existingReaction.createdAt = new Date();
+    } else {
+      // Add new reaction
+      message.reactions.push({
+        userId: loggedInUserId,
+        emoji,
+        createdAt: new Date(),
+      });
+    }
+
+    await message.save();
+
+    // Notify both sender and receiver via socket
+    const senderSocketId = getReceiverSocketId(message.senderId);
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+
+    const reactionData = { messageId, userId: loggedInUserId, emoji };
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("messageReaction", reactionData);
+    }
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageReaction", reactionData);
+    }
+
+    res.status(200).json(message);
+  } catch (error) {
+    console.error("Error in addReaction:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const removeReaction = async (req, res) => {
+  try {
+    const { id: messageId } = req.params;
+    const loggedInUserId = req.user._id;
+
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    // Remove user's reaction
+    message.reactions = message.reactions.filter(
+      (r) => r.userId.toString() !== loggedInUserId.toString()
+    );
+
+    await message.save();
+
+    // Notify both sender and receiver via socket
+    const senderSocketId = getReceiverSocketId(message.senderId);
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+
+    const reactionData = { messageId, userId: loggedInUserId };
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("messageReactionRemoved", reactionData);
+    }
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageReactionRemoved", reactionData);
+    }
+
+    res.status(200).json(message);
+  } catch (error) {
+    console.error("Error in removeReaction:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

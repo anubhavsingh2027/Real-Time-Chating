@@ -219,7 +219,7 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
@@ -260,8 +260,8 @@ const SettingsPage = () => {
       </div>
 
       {/* Settings Content with padding for fixed header */}
-      <div className="pt-40 pb-32 px-4">
-        <div className="max-w-4xl mx-auto space-y-3">
+      <div className="pt-40 pb-32 px-3 sm:px-4">
+        <div className="max-w-4xl mx-auto space-y-2 sm:space-y-3">
           {/* Profile Section */}
           {filterSections("profile") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm overflow-hidden">
@@ -710,7 +710,7 @@ const SettingsPage = () => {
       </div>
 
       {/* Fixed Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="max-w-4xl mx-auto p-4 space-y-2">
           <button
             onClick={handleResetSettings}
