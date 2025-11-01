@@ -26,11 +26,36 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
   useEffect(() => {
     const onEsc = (e) => {
-      if (e.key === 'Escape') setShowImageModal(false);
+      if (e.key === 'Escape') {
+        setShowImageModal(false);
+        setShowActions(false);
+        setShowMenuButton(false);
+      }
     };
     window.addEventListener('keydown', onEsc);
     return () => window.removeEventListener('keydown', onEsc);
   }, []);
+
+  // Close actions dropdown when clicking outside or tapping outside on mobile
+  useEffect(() => {
+    if (!showActions) return;
+
+    const onDocClick = (e) => {
+      const el = bubbleRef.current;
+      if (!el) return;
+      if (!el.contains(e.target)) {
+        setShowActions(false);
+        setShowMenuButton(false);
+      }
+    };
+
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('touchstart', onDocClick);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('touchstart', onDocClick);
+    };
+  }, [showActions]);
 
   // Ensure only one dropdown is open at a time across MessageBubble instances
   useEffect(() => {

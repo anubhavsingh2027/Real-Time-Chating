@@ -92,8 +92,10 @@ export const useChatStore = create(
           );
           const actualMessage = res.data;
 
-          // Clear reply after sending
-          get().clearReplyToMessage();
+          // Clear reply after sending (only if handler exists)
+          if (typeof get().clearReplyToMessage === 'function') {
+            get().clearReplyToMessage();
+          }
 
           // Update messages, replacing optimistic with actual
           set((state) => ({
