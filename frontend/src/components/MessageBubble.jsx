@@ -4,7 +4,6 @@ import {
   Copy,
   Check,
   Download,
-  ZoomIn,
   Trash2,
   X,
 } from 'lucide-react';
@@ -14,6 +13,7 @@ import { useAuthStore } from '../store/useAuthStore';
 
 function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete }) {
   const [showActions, setShowActions] = useState(false);
+  const [showReactionPopup, setShowReactionPopup] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showMenuButton, setShowMenuButton] = useState(false);
   const longPressTimer = useRef(null);
@@ -29,6 +29,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       if (e.key === 'Escape') {
         setShowImageModal(false);
         setShowActions(false);
+        setShowReactionPopup(false);
         setShowMenuButton(false);
       }
     };
@@ -38,13 +39,14 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
   // Close actions dropdown when clicking outside or tapping outside on mobile
   useEffect(() => {
-    if (!showActions) return;
+    if (!showActions && !showReactionPopup) return;
 
     const onDocClick = (e) => {
       const el = bubbleRef.current;
       if (!el) return;
       if (!el.contains(e.target)) {
         setShowActions(false);
+        setShowReactionPopup(false);
         setShowMenuButton(false);
       }
     };
@@ -55,7 +57,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('touchstart', onDocClick);
     };
-  }, [showActions]);
+  }, [showActions, showReactionPopup]);
 
   // Ensure only one dropdown is open at a time across MessageBubble instances
   useEffect(() => {
@@ -64,6 +66,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       if (!otherId) return;
       if (otherId !== message._id) {
         setShowActions(false);
+        setShowReactionPopup(false);
         setShowMenuButton(false);
       }
     };
@@ -74,10 +77,10 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   const handleCopyMessage = async () => {
     try {
       await navigator.clipboard.writeText(message.text || '');
-      toast.success('Copied');
+      toast.success('Copied to clipboard');
       setShowActions(false);
     } catch {
-      toast.error('Copy failed');
+      toast.error('Failed to copy');
     }
   };
 
@@ -101,11 +104,16 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   const handleReaction = async (emoji) => {
     try {
       await addReaction(message._id, emoji);
-      // show success feedback and close menu
-      toast.success(`Reacted with ${emoji}`);
-      setShowActions(false);
+      // Show success feedback with the actual emoji
+      toast.success(`You reacted with ${emoji}`, {
+        icon: emoji,
+        duration: 2000,
+      });
+      setShowReactionPopup(false);
+      setShowMenuButton(false);
     } catch (err) {
       console.error(err);
+      toast.error('Failed to add reaction');
     }
   };
 
@@ -144,12 +152,12 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   // Hover + Long Press Behavior
   const handleMouseEnter = () => setShowMenuButton(true);
   const handleMouseLeave = () => {
-    if (!showActions) setShowMenuButton(false);
+    if (!showActions && !showReactionPopup) setShowMenuButton(false);
   };
 
   const handleTouchStart = () => {
     longPressTimer.current = setTimeout(() => {
-      setShowActions(true);
+      setShowReactionPopup(true);
       setShowMenuButton(true);
       // notify others to close
       window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
@@ -161,9 +169,6 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   };
 
   const containerAlign = isOwnMessage ? 'justify-end' : 'justify-start';
-  const bubbleBackground = isOwnMessage
-    ? 'bg-emerald-500 text-white before:border-r-emerald-500'
-    : 'bg-gray-800 text-gray-100 dark:bg-slate-700 dark:text-slate-100 before:border-l-gray-800 dark:before:border-l-slate-700';
 
   return (
     <div
@@ -175,16 +180,63 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
       onTouchEnd={handleTouchEnd}
     >
       <div className="relative max-w-[85%] flex flex-col items-end">
+        {/* WhatsApp-style emoji reaction popup - centered above message */}
+        {showReactionPopup && (
+          <div
+            className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in-95 duration-150`}
+          >
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-2 flex items-center gap-1 ring-1 ring-black/5 dark:ring-white/10">
+              {reactions.map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => handleReaction(emoji)}
+                  className="text-2xl p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors active:scale-95"
+                  title={emoji}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Message bubble with WhatsApp-style tail */}
         <div
-          className={`group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 
-            before:content-[''] before:absolute before:w-0 before:h-0 
-            before:border-[6px] before:border-transparent
-            ${isOwnMessage ? 
-              'rounded-tr-sm rounded-br-none before:-right-[11px] before:top-[6px] before:border-r-0' : 
-              'rounded-tl-sm rounded-bl-none before:-left-[11px] before:top-[6px] before:border-l-0'
-            } 
-            ${bubbleBackground} bg-opacity-95`}
+          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
+            isOwnMessage
+              ? 'bg-emerald-500 text-white rounded-tr-[4px]'
+              : 'bg-slate-700 text-slate-100 rounded-tl-[4px]'
+          }`}
+          style={{
+            position: 'relative',
+          }}
         >
+          {/* WhatsApp-style tail using ::after pseudo-element */}
+          <style>{`
+            .message-bubble::after {
+              content: '';
+              position: absolute;
+              top: 0;
+              width: 0;
+              height: 0;
+              border-style: solid;
+            }
+
+            /* Sender message tail (right side) */
+            .message-bubble.bg-emerald-500::after {
+              right: -8px;
+              border-width: 0 0 12px 8px;
+              border-color: transparent transparent transparent rgb(16 185 129);
+            }
+
+            /* Receiver message tail (left side) */
+            .message-bubble.bg-slate-700::after {
+              left: -8px;
+              border-width: 0 8px 12px 0;
+              border-color: transparent rgb(51 65 85) transparent transparent;
+            }
+          `}</style>
+
           {/* Image (if present) */}
           {message.image && (
             <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
@@ -208,7 +260,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
           {/* Timestamp + status */}
           <div className="flex items-center gap-2 self-end mt-0.5">
-            <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`}>
+            <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-slate-300'}`}>
               {message.createdAt
                 ? new Date(message.createdAt).toLocaleTimeString([], {
                     hour: '2-digit',
@@ -220,90 +272,98 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
           </div>
         </div>
 
-        {/* Reaction / options button (hover or long press) */}
+        {/* Dropdown menu button (hover or long press) */}
         <div
-          className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} transform -translate-y-[42px] transition-all duration-200 ${
+          className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-0 -translate-y-10 transition-all duration-200 ${
             showMenuButton ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'
           }`}
         >
-          <div className="flex items-start">
-            <button
-              onClick={() => {
-                const next = !showActions;
-                setShowActions(next);
-                setShowMenuButton(true);
-                if (next) {
-                  // notify others to close
-                  window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
-                }
-              }}
-              className={`-translate-y-1 p-1.5 rounded-full transition-all duration-150 focus:outline-none ${
-                isOwnMessage ? 'bg-emerald-600/20 hover:bg-emerald-600/30' : 'bg-white/10 hover:bg-white/20'
-              }`}
-              aria-label="message actions"
-            >
-              <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/90' : 'text-gray-300'}`} />
-            </button>
+          <button
+            onClick={() => {
+              const next = !showActions;
+              setShowActions(next);
+              setShowReactionPopup(false);
+              setShowMenuButton(true);
+              if (next) {
+                // notify others to close
+                window.dispatchEvent(new CustomEvent('message-dropdown-open', { detail: { id: message._id } }));
+              }
+            }}
+            className={`p-1.5 rounded-full transition-all duration-150 focus:outline-none shadow-md ${
+              isOwnMessage ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-600 hover:bg-slate-700'
+            }`}
+            aria-label="message actions"
+          >
+            <ChevronDown className="w-4 h-4 text-white" />
+          </button>
+        </div>
 
-            {/* Menu panel */}
-              <div className={`${isOwnMessage ? 'ml-2' : 'mr-2'} relative z-50`}>
-              <div
-                className={`transform ${isOwnMessage ? 'origin-top-left' : 'origin-top-right'} transition-all duration-150 ease-out ${
-                  showActions ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
-                }`}
-              >
-                <div className="rounded-xl shadow-lg py-2 w-52 backdrop-blur-sm bg-white/95 dark:bg-slate-800/95 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10">
-                  {/* Copy */}
+        {/* Actions menu panel */}
+        {showActions && (
+          <div
+            className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-0 -translate-y-10 z-50 animate-in fade-in zoom-in-95 duration-150 ${
+              isOwnMessage ? 'mr-10' : 'ml-10'
+            }`}
+          >
+            <div className="rounded-xl shadow-xl py-2 w-52 backdrop-blur-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10">
+              {/* Copy */}
+              <div className="px-2">
+                <button
+                  onClick={handleCopyMessage}
+                  className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
+                >
+                  <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  Copy
+                </button>
+              </div>
+
+              {/* React button - opens emoji popup */}
+              <div className="px-2">
+                <button
+                  onClick={() => {
+                    setShowReactionPopup(true);
+                    setShowActions(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
+                >
+                  <span className="text-lg">😊</span>
+                  React
+                </button>
+              </div>
+
+              {message.image && (
+                <div className="px-2">
+                  <button
+                    onClick={() => handleDownloadImage(message.image)}
+                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
+                  >
+                    <Download className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    Download
+                  </button>
+                </div>
+              )}
+
+              {/* Delete */}
+              {isOwnMessage && (
+                <>
+                  <div className="my-1 border-t border-gray-100 dark:border-slate-700" />
                   <div className="px-2">
                     <button
-                      onClick={() => {
-                        handleCopyMessage();
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
+                      onClick={handleDelete}
+                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors"
                     >
-                      <Copy className="w-4 h-4 text-gray-500" />
-                      Copy
+                      <Trash2 className="w-4 h-4" /> Delete
                     </button>
                   </div>
-
-                  {/* Emoji row */}
-                  <div className="px-2 pt-1">
-                    <div className="flex items-center justify-between gap-1 px-1">
-                      {reactions.map((r) => (
-                        <button
-                          key={r}
-                          onClick={() => handleReaction(r)}
-                          className="text-lg p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-                          title={r}
-                        >
-                          {r}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-2 border-t border-gray-100 dark:border-white/5" />
-
-                  {/* Delete */}
-                  {isOwnMessage && (
-                    <div className="px-2 mt-1">
-                      <button
-                        onClick={handleDelete}
-                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Reactions preview */}
         {message.reactions && message.reactions.length > 0 && (
-          <div className={`absolute -bottom-2 ${isOwnMessage ? 'right-2' : 'left-2'} bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-700 flex items-center gap-1 text-sm`}>
+          <div className={`absolute -bottom-2 ${isOwnMessage ? 'right-2' : 'left-2'} bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-700 flex items-center gap-1 text-sm z-10`}>
             {message.reactions.slice(0, 3).map((r, i) => (
               <span key={i}>{r.emoji || r}</span>
             ))}
