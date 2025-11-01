@@ -1,145 +1,98 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Copy, Check, Download, ZoomIn, Trash2, Smile } from 'lucide-react';
+import {
+  ChevronDown,
+  Copy,
+  Check,
+  Download,
+  ZoomIn,
+  Trash2,
+  Smile,
+  X,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useLayoutEffect } from 'react';
 import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 
-function MessageBubble({
-  message,
-  isOwnMessage,
-  messageStatus = 'sent',
-  onDelete
-}) {
+/**
+ * MessageBubble
+ * props:
+ *  - message: { _id, text, image, createdAt, reactions }
+ *  - isOwnMessage: boolean
+ *  - messageStatus: 'sending' | 'sent' | 'delivered' | 'seen'
+ *  - onDelete?: function(id)
+ */
+function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete }) {
   const [showActions, setShowActions] = useState(false);
-  const [isLongPress, setIsLongPress] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
-  const [showReactions, setShowReactions] = useState(false);
-  const { addReaction, removeReaction } = useChatStore();
-  const { authUser } = useAuthStore();
-  const longPressTimer = useRef(null);
   const bubbleRef = useRef(null);
-  const messageTextRef = useRef(null);
-  const [dynamicWidth, setDynamicWidth] = useState('fit-content');
+  const imageRef = useRef(null);
+  const { addReaction } = useChatStore();
+  const { authUser } = useAuthStore();
 
-  const reactions = [
-    { emoji: '❤️', name: 'heart' },
-    { emoji: '👍', name: 'thumbs-up' },
-    { emoji: '😊', name: 'smile' },
-    { emoji: '😂', name: 'laugh' },
-    { emoji: '😮', name: 'wow' },
-    { emoji: '😢', name: 'sad' },
-  ];
+  const reactions = ['❤️', '👍', '😊', '😂', '😮', '😢'];
 
-  useLayoutEffect(() => {
-    if (messageTextRef.current && bubbleRef.current && message.text) {
-      const containerWidth = bubbleRef.current.parentElement.offsetWidth;
-      const textWidth = messageTextRef.current.offsetWidth;
-      const widthPercentage = (textWidth / containerWidth) * 100;
-
-      if (widthPercentage > 30) {
-        setDynamicWidth('30%');
-      } else {
-        setDynamicWidth(`${Math.min(widthPercentage + 2, 30)}%`);
-      }
-    }
-  }, [message.text]);
+  useEffect(() => {
+    const onEsc = (e) => {
+      if (e.key === 'Escape') setShowImageModal(false);
+    };
+    window.addEventListener('keydown', onEsc);
+    return () => window.removeEventListener('keydown', onEsc);
+  }, []);
 
   const handleCopyMessage = async () => {
     try {
-      await navigator.clipboard.writeText(message.text);
-      toast.success('Message copied!');
+      await navigator.clipboard.writeText(message.text || '');
+      toast.success('Copied');
       setShowActions(false);
-      setIsLongPress(false);
-    } catch (err) {
-      toast.error('Failed to copy message');
+    } catch (e) {
+      toast.error('Copy failed');
     }
   };
 
-  const handleDownloadImage = async () => {
+  const handleDownloadImage = async (url) => {
     try {
-      const response = await fetch(message.image);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `image-${Date.now()}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('Image downloaded!');
-      setShowActions(false);
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      const ext = (blob.type || 'image/jpeg').split('/')[1] || 'jpg';
+      link.download = `image-${Date.now()}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('Download started');
     } catch (err) {
-      toast.error('Failed to download image');
+      toast.error('Download failed');
     }
   };
 
-  const handleZoomImage = () => {
-    setShowImageModal(true);
-    setShowActions(false);
+  const handleReaction = async (emoji) => {
+    try {
+      await addReaction(message._id, emoji);
+      setShowActions(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDelete = () => {
-    if (onDelete) {
-      if (window.confirm('Are you sure you want to delete this message?')) {
-        onDelete(message._id);
-        toast.success('Message deleted');
-      }
-    }
-    setShowActions(false);
-    setIsLongPress(false);
-  };
-
-  const handleReaction = async (reaction) => {
-    setShowReactions(false);
-    setShowActions(false);
-    await addReaction(message._id, reaction.emoji);
-  };
-
-  const handleToggleMenu = (e) => {
-    e.stopPropagation();
-    setShowActions(prev => !prev);
-  };
-
-  const handleTouchStart = () => {
-    longPressTimer.current = setTimeout(() => {
-      setIsLongPress(true);
-      setShowActions(true);
-    }, 500);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
+    if (!onDelete) return;
+    if (confirm('Delete this message?')) {
+      onDelete(message._id);
     }
   };
-
-  useEffect(() => {
-    if (showActions || isLongPress) {
-      const handleClickOutside = (e) => {
-        if (bubbleRef.current && !bubbleRef.current.contains(e.target)) {
-          setShowActions(false);
-          setIsLongPress(false);
-        }
-      };
-
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
-  }, [showActions, isLongPress]);
 
   const getStatusIcon = () => {
     switch (messageStatus) {
       case 'sending':
-        return <div className="animate-spin w-4 h-4 border-2 border-black dark:border-white border-t-transparent rounded-full" />;
+        return <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />;
       case 'sent':
-        return <Check className="w-4 h-4 text-black dark:text-white" strokeWidth={2} />;
+        return <Check className="w-4 h-4 text-white" strokeWidth={2} />;
       case 'delivered':
         return (
           <div className="flex -space-x-1">
-            <Check className="w-4 h-4 text-black dark:text-white" strokeWidth={2} />
-            <Check className="w-4 h-4 text-black dark:text-white" strokeWidth={2} />
+            <Check className="w-4 h-4 text-white/90" strokeWidth={2} />
+            <Check className="w-4 h-4 text-white/90" strokeWidth={2} />
           </div>
         );
       case 'seen':
@@ -154,185 +107,144 @@ function MessageBubble({
     }
   };
 
+  // Styles
+  const containerAlign = isOwnMessage ? 'justify-end' : 'justify-start';
+  const bubbleBackground = isOwnMessage
+    ? 'bg-emerald-500 text-white'
+    : 'bg-gray-800 text-gray-100 dark:bg-slate-700 dark:text-slate-100';
+
   return (
-    <>
-      <div
-        ref={bubbleRef}
-        style={{ width: message.text ? dynamicWidth : 'auto' }}
-        className={`group relative min-w-[120px] ${isOwnMessage ? 'ml-auto' : 'mr-auto'}`}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
+    <div className={`w-full flex ${containerAlign} mb-2 px-3`} ref={bubbleRef}>
+      <div className="relative max-w-[85%] flex flex-col items-end">
         <div
-          className={`relative rounded-lg px-3.5 py-2.5
-            ${isOwnMessage ? 'bg-emerald-500 text-white rounded-tr-none' : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-tl-none'}
-            transition-all duration-200 ease-in-out`}
+          className={`group inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
+            isOwnMessage ? 'rounded-tr-2xl rounded-br-none' : 'rounded-tl-2xl rounded-bl-none'
+          } ${bubbleBackground} bg-opacity-95`}
         >
+          {/* Image (if present) */}
           {message.image && (
-            <div className="relative group/image mb-1">
+            <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
               <img
+                ref={imageRef}
                 src={message.image}
-                alt="Shared"
-                className="rounded-lg max-w-[200px] sm:max-w-[280px] w-auto max-h-[300px] object-cover cursor-pointer"
-                onClick={handleZoomImage}
+                alt={message.text ? 'attachment' : 'image'}
+                onClick={() => setShowImageModal(true)}
+                onError={(e) => (e.currentTarget.style.display = 'none')}
+                className="w-auto h-auto max-w-full max-h-[60vh] object-contain cursor-pointer block"
+                style={{ display: 'block' }}
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity rounded-lg flex items-center justify-center pointer-events-none">
-                <ZoomIn className="w-8 h-8 text-white" />
-              </div>
             </div>
           )}
+
+          {/* Text */}
           {message.text && (
-            <div ref={messageTextRef} className="inline-block max-w-full">
-              <p className="text-[0.9375rem] leading-[1.4] break-words whitespace-pre-wrap tracking-wide font-normal">
+            <div className="text-sm leading-5 break-words whitespace-pre-wrap">
+              <span className="block">
                 {message.text}
-              </p>
+              </span>
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-1 mt-1">
-            <span className="text-[0.65rem] opacity-75">
-              {new Date(message.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-            </span>
-            {isOwnMessage && <div className="flex items-center transition-opacity duration-200">{getStatusIcon()}</div>}
+          {/* Timestamp + status */}
+          <div className="flex items-center gap-2 self-end mt-0.5">
+            <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`}>
+              {message.createdAt ? new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+            </time>
+            {isOwnMessage && <div className="flex items-center">{getStatusIcon()}</div>}
           </div>
+        </div>
 
-          {message.reactions && message.reactions.length > 0 && (
-            <div className="absolute -bottom-2 right-2 bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-600 flex items-center gap-1">
-              {message.reactions.slice(0, 3).map((reaction, idx) => (
-                <span key={`${reaction.userId}-${idx}`} className="text-sm">
-                  {reaction.emoji}
-                </span>
-              ))}
-              {message.reactions.length > 3 && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  +{message.reactions.length - 3}
-                </span>
-              )}
-            </div>
-          )}
-
+        {/* Reaction / options button (compact) */}
+        <div className={`relative ${isOwnMessage ? 'right-0' : 'left-0'} mt-1`}> 
           <button
-            onClick={handleToggleMenu}
-            className={`absolute ${isOwnMessage ? '-left-7' : '-right-7'} top-1/2 -translate-y-1/2
-              opacity-0 group-hover:opacity-100 transition-opacity duration-200
-              p-1.5 rounded-full bg-gray-200/50 dark:bg-slate-800/50 backdrop-blur-sm
-              hover:bg-gray-300 dark:hover:bg-slate-700 z-10`}
-            title="Message options"
+            onClick={() => setShowActions((s) => !s)}
+            className="-translate-y-2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/80 transition-colors"
+            aria-label="message actions"
           >
-            <ChevronDown className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+            <ChevronDown className={`w-4 h-4 ${isOwnMessage ? 'text-white/80' : 'text-gray-300'}`} />
           </button>
 
           {showActions && (
-            <div
-              className={`absolute z-[60] ${
-                isLongPress
-                  ? `top-1/2 -translate-y-1/2 ${isOwnMessage ? '-left-36' : '-right-36'}`
-                  : `${isOwnMessage ? 'left-0' : 'right-0'} -top-2 ${isOwnMessage ? '-translate-x-full' : 'translate-x-full'}`
-              }`}
-            >
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 py-1 w-36">
-                <div className="relative">
-                  <button
-                    onClick={() => setShowReactions(!showReactions)}
-                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    <Smile className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                    <span className="text-black dark:text-white">React</span>
+            <div className={`absolute z-50 ${isOwnMessage ? 'right-0' : 'left-0'} mt-2`}> 
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 w-40">
+                <div className="flex flex-col">
+                  <button onClick={handleCopyMessage} className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                    <Copy className="w-4 h-4 text-gray-500" /> Copy
                   </button>
-                  {showReactions && (
-                    <div className="absolute left-full top-0 ml-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 p-2 flex gap-1 z-[70]">
-                      {reactions.map((reaction) => (
-                        <button
-                          key={reaction.name}
-                          onClick={() => handleReaction(reaction)}
-                          className="text-xl hover:scale-125 transition-transform p-1"
-                          title={reaction.name}
-                        >
-                          {reaction.emoji}
-                        </button>
-                      ))}
-                    </div>
+                  {message.image && (
+                    <>
+                      <button onClick={() => { setShowImageModal(true); setShowActions(false); }} className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                        <ZoomIn className="w-4 h-4 text-gray-500" /> View
+                      </button>
+                      <button onClick={() => handleDownloadImage(message.image)} className="px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2">
+                        <Download className="w-4 h-4 text-gray-500" /> Download
+                      </button>
+                    </>
+                  )}
+                  <div className="border-t border-gray-100 dark:border-slate-700 my-1" />
+                  <div className="px-2 py-1 flex items-center gap-1">
+                    {reactions.map((r) => (
+                      <button key={r} onClick={() => handleReaction(r)} className="text-lg p-1 hover:scale-110 transition-transform">
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                  {isOwnMessage && (
+                    <>
+                      <div className="border-t border-gray-100 dark:border-slate-700 my-1" />
+                      <button onClick={handleDelete} className="px-3 py-2 text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-500">
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    </>
                   )}
                 </div>
-
-                {message.text && (
-                  <button
-                    onClick={handleCopyMessage}
-                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    <Copy className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                    <span className="text-black dark:text-white">Copy</span>
-                  </button>
-                )}
-
-                {message.image && (
-                  <>
-                    <button
-                      onClick={handleZoomImage}
-                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <ZoomIn className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                      <span className="text-black dark:text-white">View</span>
-                    </button>
-                    <button
-                      onClick={handleDownloadImage}
-                      className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <Download className="w-4 h-4 text-gray-500 dark:text-slate-400" />
-                      <span className="text-black dark:text-white">Download</span>
-                    </button>
-                  </>
-                )}
-
-                {isOwnMessage && (
-                  <button
-                    onClick={handleDelete}
-                    className="w-full px-3 py-2 text-sm text-left flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                    <span className="text-red-500">Delete</span>
-                  </button>
-                )}
               </div>
             </div>
           )}
         </div>
+
+        {/* Reactions preview */}
+        {message.reactions && message.reactions.length > 0 && (
+          <div className="absolute -bottom-2 right-2 bg-white dark:bg-slate-800 rounded-full px-2 py-0.5 shadow-md border border-gray-200 dark:border-slate-700 flex items-center gap-1 text-sm">
+            {message.reactions.slice(0, 3).map((r, i) => (
+              <span key={i}>{r.emoji || r}</span>
+            ))}
+            {message.reactions.length > 3 && <span className="text-xs text-gray-500">+{message.reactions.length - 3}</span>}
+          </div>
+        )}
       </div>
 
+      {/* Image modal */}
       {showImageModal && message.image && (
         <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setShowImageModal(false)}
         >
-          <div className="relative max-w-4xl max-h-[90vh]">
+          <div className="relative max-w-[95%] max-h-[95%]">
             <img
               src={message.image}
-              alt="Full size"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              alt="preview"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
             <button
               onClick={() => setShowImageModal(false)}
-              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors z-10"
+              className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full p-2"
+              aria-label="close preview"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-5 h-5" />
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDownloadImage();
-              }}
-              className="absolute bottom-4 right-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-4 py-2 flex items-center gap-2 transition-colors z-10"
+              onClick={(e) => { e.stopPropagation(); handleDownloadImage(message.image); }}
+              className="absolute bottom-3 right-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-3 py-2 flex items-center gap-2"
             >
-              <Download className="w-5 h-5" />
-              <span>Download</span>
+              <Download className="w-4 h-4" />
+              <span className="text-sm">Download</span>
             </button>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
