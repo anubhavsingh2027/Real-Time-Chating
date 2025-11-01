@@ -27,7 +27,7 @@ export default {
       colors: {
         whatsapp: {
           outgoing: "rgb(16 185 129)", // emerald-500
-          incoming: "rgb(51 65 85)",   // slate-700
+          incoming: "rgb(51 65 85)", // slate-700
         },
       },
     },

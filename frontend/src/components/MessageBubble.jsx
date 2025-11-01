@@ -183,17 +183,17 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
         {/* WhatsApp-style emoji reaction popup - centered above message */}
         {showReactionPopup && (
           <div
-            className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 
+            className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50
               animate-in fade-in zoom-in-95 duration-200 origin-bottom`}
           >
-            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-1.5 
+            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-1.5
               flex items-center gap-0.5 ring-1 ring-black/5 dark:ring-white/10
               scale-100 hover:scale-[1.02] transition-transform">
               {reactions.map((emoji) => (
                 <button
                   key={emoji}
                   onClick={() => handleReaction(emoji)}
-                  className="text-2xl p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-700/70 
+                  className="text-2xl p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-700/70
                     transition-colors active:scale-90"
                   title={`React with ${emoji}`}
                 >
@@ -206,38 +206,56 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Message bubble with WhatsApp-style tail */}
         <div
-          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
+          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-lg shadow-sm transition-all duration-200 ${
             isOwnMessage
-              ? 'bg-emerald-500 text-white rounded-tr-[4px]'
-              : 'bg-slate-700 text-slate-100 rounded-tl-[4px]'
+              ? 'bg-emerald-500 text-white rounded-tr-none'
+              : 'bg-slate-700 text-slate-100 rounded-tl-none'
           }`}
-          style={{
-            position: 'relative',
-          }}
         >
-          {/* WhatsApp-style tail using ::after pseudo-element */}
+          {/* WhatsApp-style tail using ::before pseudo-element */}
           <style>{`
+            .message-bubble::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              width: 12px;
+              height: 20px;
+              background-color: inherit;
+              pointer-events: none;
+            }
+
+            /* Tail base shape using ::after */
             .message-bubble::after {
               content: '';
               position: absolute;
               top: 0;
-              width: 0;
-              height: 0;
-              border-style: solid;
+              width: 20px;
+              height: 20px;
+              background-color: inherit;
+              transform-origin: center;
+              pointer-events: none;
             }
 
             /* Sender message tail (right side) */
+            .message-bubble.bg-emerald-500::before {
+              right: -12px;
+              clip-path: polygon(0 0, 100% 0, 0 100%);
+            }
+            
             .message-bubble.bg-emerald-500::after {
-              right: -8px;
-              border-width: 0 0 12px 8px;
-              border-color: transparent transparent transparent rgb(16 185 129);
+              right: -10px;
+              clip-path: polygon(0 0, 100% 100%, 0 100%);
             }
 
             /* Receiver message tail (left side) */
+            .message-bubble.bg-slate-700::before {
+              left: -12px;
+              clip-path: polygon(0 0, 100% 100%, 100% 0);
+            }
+            
             .message-bubble.bg-slate-700::after {
-              left: -8px;
-              border-width: 0 8px 12px 0;
-              border-color: transparent rgb(51 65 85) transparent transparent;
+              left: -10px;
+              clip-path: polygon(100% 0, 100% 100%, 0 0);
             }
           `}</style>
 
