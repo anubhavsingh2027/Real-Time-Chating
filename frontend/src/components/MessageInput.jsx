@@ -85,39 +85,25 @@ function MessageInput() {
     <div className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700">
 
 
-      {/* Image Previews */}
+      {/* Compact Image Preview */}
       {imagePreviews.length > 0 && (
-        <div className="p-3 border-b border-gray-200 dark:border-slate-700">
+        <div className="px-3 pt-2">
           <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Selected Images ({imagePreviews.length}/5)
-              </h4>
-              <button
-                onClick={() => setImagePreviews([])}
-                className="text-xs text-red-500 hover:text-red-600 font-medium"
-              >
-                Clear All
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-              {imagePreviews.map((img) => (
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent">
+              {imagePreviews.map((img, index) => (
                 <div
                   key={img.id}
-                  className="relative group bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all"
+                  className="relative flex-none group"
                 >
-                  <div className="aspect-square relative">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-emerald-500 dark:border-emerald-600 bg-gray-100 dark:bg-slate-700">
                     <img
                       src={img.data}
                       alt={img.name}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 right-0 p-2">
-                        <p className="text-xs text-white font-medium truncate">
-                          {img.name}
-                        </p>
-                        <p className="text-xs text-gray-300">
+                      <div className="absolute bottom-1 left-1 right-1">
+                        <p className="text-[10px] text-white font-medium truncate">
                           {formatFileSize(img.size)}
                         </p>
                       </div>
@@ -125,23 +111,28 @@ function MessageInput() {
                   </div>
                   <button
                     onClick={() => removeImage(img.id)}
-                    className="absolute top-1 right-1 w-7 h-7 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-lg transform transition-transform hover:scale-110"
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-lg transform transition-transform hover:scale-110"
                     type="button"
                   >
-                    <XIcon className="w-4 h-4" />
+                    <XIcon className="w-3 h-3" />
                   </button>
+                  <div className="absolute -bottom-1 -left-1 h-5 min-w-5 px-1.5 rounded-full bg-emerald-500 flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-white">
+                      {index + 1}
+                    </span>
+                  </div>
                 </div>
               ))}
 
-              {/* Add More Button */}
+              {/* Inline Add More Button */}
               {imagePreviews.length < 5 && (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-500 flex flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  className="w-16 h-16 flex-none rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-500 flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors group"
                 >
-                  <PlusIcon className="w-8 h-8 text-gray-400 dark:text-slate-500" />
-                  <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">
+                  <PlusIcon className="w-6 h-6 text-gray-400 dark:text-slate-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors" />
+                  <span className="text-[10px] text-gray-500 dark:text-slate-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 font-medium transition-colors">
                     Add More
                   </span>
                 </button>
@@ -152,21 +143,8 @@ function MessageInput() {
       )}
 
       {/* Input Area */}
-      <form onSubmit={handleSendMessage} className="p-3">
-        <div className="max-w-3xl mx-auto flex items-center space-x-2">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className={`flex-none p-3 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors ${
-              imagePreviews.length > 0
-                ? "text-emerald-500"
-                : "text-gray-500 dark:text-slate-400"
-            }`}
-            title="Add images (Max 5, up to 5MB each)"
-          >
-            <ImageIcon className="w-6 h-6" />
-          </button>
-
+      <form onSubmit={handleSendMessage} className="p-3 pt-1">
+        <div className="max-w-3xl mx-auto flex items-end space-x-2">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -181,21 +159,32 @@ function MessageInput() {
                   handleSendMessage(e);
                 }
               }}
-              className="w-full bg-gray-100 dark:bg-slate-700 rounded-full py-3 px-4 pr-12 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-600 placeholder:text-gray-500 dark:placeholder:text-slate-400"
+              className="w-full bg-gray-100 dark:bg-slate-700 rounded-2xl py-3 pl-12 pr-4 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-600 placeholder:text-gray-500 dark:placeholder:text-slate-400"
               placeholder={
                 imagePreviews.length > 0
                   ? "Add a caption (optional)..."
                   : "Type a message..."
               }
             />
-            {imagePreviews.length > 0 && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded-full">
-                <FileIcon className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  {imagePreviews.length}
-                </span>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className={`absolute left-2 bottom-2 p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-all ${
+                imagePreviews.length > 0
+                  ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30"
+                  : "text-gray-500 dark:text-slate-400"
+              }`}
+              title="Add images (Max 5, up to 5MB each)"
+            >
+              <ImageIcon className="w-5 h-5" />
+              {imagePreviews.length > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-white">
+                    {imagePreviews.length}
+                  </span>
+                </div>
+              )}
+            </button>
           </div>
 
           <input
@@ -210,9 +199,9 @@ function MessageInput() {
           <button
             type="submit"
             disabled={!text.trim() && imagePreviews.length === 0}
-            className="flex-none p-3 text-white rounded-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
+            className="flex-none p-3 text-white rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
           >
-            <SendIcon className="w-6 h-6" />
+            <SendIcon className="w-5 h-5" />
           </button>
         </div>
       </form>
