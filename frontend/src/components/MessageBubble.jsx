@@ -206,7 +206,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Message bubble with WhatsApp-style tail */}
         <div
-          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 transition-all duration-200 ${
+          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 transition-all duration-200 max-w-[85%] md:max-w-[65%] ${
             isOwnMessage
               ? 'bg-[#00a884] text-white ml-auto'
               : 'bg-[#202c33] text-slate-100'
@@ -216,7 +216,11 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
           <style>{`
             .message-bubble {
               position: relative;
-              max-width: 85%;
+              overflow: visible;
+            }
+
+            /* Base border radius for all corners */
+            .message-bubble {
               border-radius: 12px;
             }
 
@@ -224,43 +228,49 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               content: '';
               position: absolute;
               top: 50%;
-              transform: translateY(-50%);
               width: 8px;
               height: 16px;
+              transform: translateY(-50%);
             }
 
-            /* Sender message (arrow on left) */
+            /* Sender message (right side) */
             .message-bubble.bg-\[#00a884\] {
-              border-top-left-radius: 0;
+              border-bottom-right-radius: 12px;
+              border-top-right-radius: 0;
+              border-top-left-radius: 12px;
+              border-bottom-left-radius: 12px;
             }
             
             .message-bubble.bg-\[#00a884\]::before {
-              left: -7px;
+              right: -7px;
               background-color: #00a884;
-              clip-path: polygon(100% 50%, 100% 0, 0 0, 0 100%, 100% 100%);
+              clip-path: polygon(0 0, 0 100%, 100% 50%);
             }
 
-            /* Receiver message (arrow on right) */
+            /* Receiver message (left side) */
             .message-bubble.bg-\[#202c33\] {
-              border-top-right-radius: 0;
+              border-bottom-left-radius: 12px;
+              border-top-left-radius: 0;
+              border-top-right-radius: 12px;
+              border-bottom-right-radius: 12px;
             }
 
             .message-bubble.bg-\[#202c33\]::before {
-              right: -7px;
+              left: -7px;
               background-color: #202c33;
-              clip-path: polygon(0 50%, 0 0, 100% 0, 100% 100%, 0 100%);
+              clip-path: polygon(100% 0, 100% 100%, 0 50%);
             }
 
-            @media (min-width: 768px) {
-              .message-bubble {
-                max-width: 65%;
-              }
+            /* Prevent any overflow */
+            .message-bubble > * {
+              overflow-wrap: break-word;
+              word-break: break-word;
             }
           `}</style>
 
           {/* Image (if present) */}
           {message.image && (
-            <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm flex-shrink-0">
+            <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
               <img
                 ref={imageRef}
                 src={message.image}
@@ -274,13 +284,13 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
           {/* Text */}
           {message.text && (
-            <div className="text-sm leading-5 break-words whitespace-pre-wrap max-w-full overflow-hidden">
+            <div className="text-sm leading-5 break-words whitespace-pre-wrap">
               <span className="block">{message.text}</span>
             </div>
           )}
 
           {/* Timestamp + status */}
-          <div className="flex items-center gap-2 self-end mt-0.5 flex-shrink-0">
+          <div className="flex items-center gap-2 self-end mt-0.5">
             <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-slate-300'}`}>
               {message.createdAt
                 ? new Date(message.createdAt).toLocaleTimeString([], {
@@ -311,7 +321,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               }
             }}
             className={`p-1.5 rounded-full transition-all duration-150 focus:outline-none shadow-md ${
-              isOwnMessage ? 'bg-[#00a884] hover:bg-[#008c6f]' : 'bg-slate-600 hover:bg-slate-700'
+              isOwnMessage ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-600 hover:bg-slate-700'
             }`}
             aria-label="message actions"
           >
@@ -420,7 +430,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
                 e.stopPropagation();
                 handleDownloadImage(message.image);
               }}
-              className="absolute bottom-3 right-3 bg-[#00a884] hover:bg-[#008c6f] text-white rounded-full px-3 py-2 flex items-center gap-2"
+              className="absolute bottom-3 right-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-3 py-2 flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               <span className="text-sm">Download</span>
