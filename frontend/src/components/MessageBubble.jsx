@@ -206,13 +206,14 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Message bubble with WhatsApp-style tail */}
         <div
-          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 rounded-2xl shadow-sm transition-all duration-200 ${
+          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 shadow-sm transition-all duration-200 overflow-hidden ${
             isOwnMessage
-              ? 'bg-emerald-500 text-white rounded-tr-[4px]'
-              : 'bg-slate-700 text-slate-100 rounded-tl-[4px]'
+              ? 'bg-[#00a884] text-white'
+              : 'bg-[#202c33] text-slate-100'
           }`}
           style={{
             position: 'relative',
+            borderRadius: isOwnMessage ? '12px 12px 0 12px' : '12px 12px 12px 0',
           }}
         >
           {/* WhatsApp-style tail using ::after pseudo-element */}
@@ -220,30 +221,31 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             .message-bubble::after {
               content: '';
               position: absolute;
-              top: 0;
+              top: 50%;
+              transform: translateY(-50%);
               width: 0;
               height: 0;
               border-style: solid;
             }
 
             /* Sender message tail (right side) */
-            .message-bubble.bg-emerald-500::after {
+            .message-bubble.bg-\[#00a884\]::after {
               right: -8px;
-              border-width: 0 0 12px 8px;
-              border-color: transparent transparent transparent rgb(16 185 129);
+              border-width: 8px 0 8px 8px;
+              border-color: transparent transparent transparent #00a884;
             }
 
             /* Receiver message tail (left side) */
-            .message-bubble.bg-slate-700::after {
+            .message-bubble.bg-\[#202c33\]::after {
               left: -8px;
-              border-width: 0 8px 12px 0;
-              border-color: transparent rgb(51 65 85) transparent transparent;
+              border-width: 8px 8px 8px 0;
+              border-color: transparent #202c33 transparent transparent;
             }
           `}</style>
 
           {/* Image (if present) */}
           {message.image && (
-            <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
+            <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm flex-shrink-0">
               <img
                 ref={imageRef}
                 src={message.image}
@@ -257,13 +259,13 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
           {/* Text */}
           {message.text && (
-            <div className="text-sm leading-5 break-words whitespace-pre-wrap">
+            <div className="text-sm leading-5 break-words whitespace-pre-wrap max-w-full overflow-hidden">
               <span className="block">{message.text}</span>
             </div>
           )}
 
           {/* Timestamp + status */}
-          <div className="flex items-center gap-2 self-end mt-0.5">
+          <div className="flex items-center gap-2 self-end mt-0.5 flex-shrink-0">
             <time className={`text-[11px] opacity-80 ${isOwnMessage ? 'text-white/80' : 'text-slate-300'}`}>
               {message.createdAt
                 ? new Date(message.createdAt).toLocaleTimeString([], {
@@ -294,7 +296,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               }
             }}
             className={`p-1.5 rounded-full transition-all duration-150 focus:outline-none shadow-md ${
-              isOwnMessage ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-600 hover:bg-slate-700'
+              isOwnMessage ? 'bg-[#00a884] hover:bg-[#008c6f]' : 'bg-slate-600 hover:bg-slate-700'
             }`}
             aria-label="message actions"
           >
@@ -403,7 +405,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
                 e.stopPropagation();
                 handleDownloadImage(message.image);
               }}
-              className="absolute bottom-3 right-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-3 py-2 flex items-center gap-2"
+              className="absolute bottom-3 right-3 bg-[#00a884] hover:bg-[#008c6f] text-white rounded-full px-3 py-2 flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               <span className="text-sm">Download</span>
