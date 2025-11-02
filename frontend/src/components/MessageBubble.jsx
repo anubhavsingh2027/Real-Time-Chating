@@ -224,20 +224,28 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               width: 0;
               height: 0;
               border-style: solid;
+              opacity: 0;
+              transition: opacity 0.2s ease;
+            }
+
+            .message-bubble:hover::after {
+              opacity: 1;
             }
 
             /* Sender message tail (right side) */
             .message-bubble.bg-emerald-500::after {
-              right: -8px;
-              border-width: 0 0 12px 8px;
+              right: -10px;
+              border-width: 0 0 14px 10px;
               border-color: transparent transparent transparent rgb(16 185 129);
+              filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.1));
             }
 
             /* Receiver message tail (left side) */
             .message-bubble.bg-slate-700::after {
-              left: -8px;
-              border-width: 0 8px 12px 0;
+              left: -10px;
+              border-width: 0 10px 14px 0;
               border-color: transparent rgb(51 65 85) transparent transparent;
+              filter: drop-shadow(-1px 1px 1px rgba(0, 0, 0, 0.1));
             }
           `}</style>
 
