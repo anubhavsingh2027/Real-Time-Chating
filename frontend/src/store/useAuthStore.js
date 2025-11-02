@@ -3,7 +3,10 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const BASE_URL = import.meta.env.MODE === "development" ? "https://real-time-chating-lwq5.onrender.com" : "https://real-time-chating-lwq5.onrender.com";
+const BASE_URL =
+  import.meta.env.MODE === "development"
+    ? "https://chatting.backend.anubhav.sbs"
+    : "https://chatting.backend.anubhav.sbs";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
