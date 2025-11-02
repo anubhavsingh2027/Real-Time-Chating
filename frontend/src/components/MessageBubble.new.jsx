@@ -117,6 +117,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   const handleDelete = () => {
     if (!onDelete) return;
     if (confirm('Delete this message?')) {
+      // Hide menus before delete animation starts
       setShowActions(false);
       setShowMenuButton(false);
       onDelete(message._id);
@@ -168,27 +169,26 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   const containerAlign = isOwnMessage ? 'justify-end' : 'justify-start';
 
   return (
-    <>
+    <AnimatePresence mode="popLayout">
       <motion.div
+        key={message._id}
         className={`w-full flex ${containerAlign} mb-2 px-3`}
         ref={bubbleRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          transition: { duration: 0.25, ease: "easeOut" }
-        }}
+        initial={{ opacity: 1, scale: 1 }}
         exit={{
           opacity: 0,
-          scale: 0.6,
-          y: -10,
-          filter: "blur(4px)",
-          transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }
+          scale: 0.8,
+          height: 0,
+          marginBottom: 0,
+          transition: {
+            duration: 0.3,
+            ease: [0.4, 0, 0.2, 1],
+            height: { duration: 0.2, delay: 0.1 }
+          }
         }}
         layout
       >
@@ -295,75 +295,73 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             </button>
           </motion.div>
 
-          <AnimatePresence>
-            {showActions && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="absolute z-[100]"
-                style={{
-                  [isOwnMessage ? 'right' : 'left']: '-40px',
-                  top: '0',
-                  transform: 'translateY(-100%)'
-                }}
-              >
-                <div className="rounded-xl shadow-xl py-2 w-52 backdrop-blur-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10">
+          {showActions && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute z-[100]"
+              style={{
+                [isOwnMessage ? 'right' : 'left']: '-40px',
+                top: '0',
+                transform: 'translateY(-100%)'
+              }}
+            >
+              <div className="rounded-xl shadow-xl py-2 w-52 backdrop-blur-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10">
+                <div className="px-2">
+                  <button
+                    onClick={handleCopyMessage}
+                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
+                  >
+                    <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    Copy
+                  </button>
+                </div>
+
+                <div className="px-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowReactionPopup(true);
+                      setShowActions(false);
+                      setShowMenuButton(true);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
+                  >
+                    <span className="text-lg">😊</span>
+                    React
+                  </button>
+                </div>
+
+                {message.image && (
                   <div className="px-2">
                     <button
-                      onClick={handleCopyMessage}
+                      onClick={() => handleDownloadImage(message.image)}
                       className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
                     >
-                      <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      Copy
+                      <Download className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      Download
                     </button>
                   </div>
+                )}
 
-                  <div className="px-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowReactionPopup(true);
-                        setShowActions(false);
-                        setShowMenuButton(true);
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
-                    >
-                      <span className="text-lg">😊</span>
-                      React
-                    </button>
-                  </div>
-
-                  {message.image && (
+                {isOwnMessage && (
+                  <>
+                    <div className="my-1 border-t border-gray-100 dark:border-slate-700" />
                     <div className="px-2">
                       <button
-                        onClick={() => handleDownloadImage(message.image)}
-                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
+                        onClick={handleDelete}
+                        className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors"
                       >
-                        <Download className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                        Download
+                        <Trash2 className="w-4 h-4" /> Delete
                       </button>
                     </div>
-                  )}
-
-                  {isOwnMessage && (
-                    <>
-                      <div className="my-1 border-t border-gray-100 dark:border-slate-700" />
-                      <div className="px-2">
-                        <button
-                          onClick={handleDelete}
-                          className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 text-red-600 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" /> Delete
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
 
           {message.reactions && message.reactions.length > 0 && (
             <motion.div
@@ -379,41 +377,41 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             </motion.div>
           )}
         </motion.div>
-      </motion.div>
 
-      {showImageModal && message.image && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setShowImageModal(false)}
-        >
-          <div className="relative max-w-[95%] max-h-[95%]">
-            <img
-              src={message.image}
-              alt="preview"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            />
-            <button
-              onClick={() => setShowImageModal(false)}
-              className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full p-2"
-              aria-label="close preview"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDownloadImage(message.image);
-              }}
-              className="absolute bottom-3 right-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-3 py-2 flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              <span className="text-sm">Download</span>
-            </button>
+        {showImageModal && message.image && (
+          <div
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowImageModal(false)}
+          >
+            <div className="relative max-w-[95%] max-h-[95%]">
+              <img
+                src={message.image}
+                alt="preview"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+              <button
+                onClick={() => setShowImageModal(false)}
+                className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full p-2"
+                aria-label="close preview"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownloadImage(message.image);
+                }}
+                className="absolute bottom-3 right-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-3 py-2 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-sm">Download</span>
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

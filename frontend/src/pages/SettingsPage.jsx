@@ -189,7 +189,7 @@ const SettingsPage = () => {
     reader.onloadend = async () => {
       try {
         await updateProfile({ profilePic: reader.result });
-        toast.success("Profile picture updated successfully!");
+        
       } catch (error) {
         console.error("Profile update error:", error);
         toast.error(error.response?.data?.message || "Failed to update profile picture");

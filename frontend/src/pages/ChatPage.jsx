@@ -56,13 +56,7 @@ function ChatPage() {
                 >
                   <Settings className="w-6 h-6" />
                 </button>
-                <button
-                  onClick={handleToggleSidebar}
-                  className="text-white p-2 hover:bg-white/10 rounded-full"
-                  aria-label="Menu"
-                >
-                  <Menu className="w-6 h-6" />
-                </button>
+               
               </div>
             </div>
             <ActiveTabSwitch />

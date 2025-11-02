@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
@@ -43,21 +44,23 @@ function ChatContainer({ onBack }) {
       <div className="flex-1 px-3 sm:px-6 overflow-y-auto py-4 sm:py-4 bg-gray-100 dark:bg-slate-800">
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-3">
-            {messages.map((msg) => (
-              <MessageBubble
-                key={msg._id}
-                message={msg}
-                isOwnMessage={msg.senderId === authUser._id}
-                messageStatus={
-                  msg.isOptimistic
-                    ? 'sending'
-                    : messageStatuses[msg._id] || 'sent'
-                }
-                onDelete={deleteMessage}
-                onReply={setReplyToMessage}
-                onForward={setForwardMessage}
-              />
-            ))}
+            <AnimatePresence mode="popLayout">
+              {messages.map((msg) => (
+                <MessageBubble
+                  key={msg._id}
+                  message={msg}
+                  isOwnMessage={msg.senderId === authUser._id}
+                  messageStatus={
+                    msg.isOptimistic
+                      ? 'sending'
+                      : messageStatuses[msg._id] || 'sent'
+                  }
+                  onDelete={deleteMessage}
+                  onReply={setReplyToMessage}
+                  onForward={setForwardMessage}
+                />
+              ))}
+            </AnimatePresence>
             {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>
