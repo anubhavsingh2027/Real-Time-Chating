@@ -228,18 +228,18 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               border-style: solid;
             }
 
-            /* Sender message tail (right side) */
+            /* Sender message tail (left side) */
             .message-bubble.bg-\[#00a884\]::after {
-              right: -8px;
-              border-width: 8px 0 8px 8px;
-              border-color: transparent transparent transparent #00a884;
-            }
-
-            /* Receiver message tail (left side) */
-            .message-bubble.bg-\[#202c33\]::after {
               left: -8px;
               border-width: 8px 8px 8px 0;
-              border-color: transparent #202c33 transparent transparent;
+              border-color: transparent #00a884 transparent transparent;
+            }
+
+            /* Receiver message tail (right side) */
+            .message-bubble.bg-\[#202c33\]::after {
+              right: -8px;
+              border-width: 8px 0 8px 8px;
+              border-color: transparent transparent transparent #202c33;
             }
           `}</style>
 
