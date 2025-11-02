@@ -206,40 +206,55 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
         {/* Message bubble with WhatsApp-style tail */}
         <div
-          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 shadow-sm transition-all duration-200 overflow-hidden ${
+          className={`message-bubble group relative inline-flex flex-col items-start gap-2 p-2.5 sm:p-3 transition-all duration-200 ${
             isOwnMessage
-              ? 'bg-[#00a884] text-white'
+              ? 'bg-[#00a884] text-white ml-auto'
               : 'bg-[#202c33] text-slate-100'
           }`}
-          style={{
-            position: 'relative',
-            borderRadius: isOwnMessage ? '12px 12px 0 12px' : '12px 12px 12px 0',
-          }}
         >
-          {/* WhatsApp-style tail using ::after pseudo-element */}
+          {/* WhatsApp-style tail using ::before pseudo-element */}
           <style>{`
-            .message-bubble::after {
+            .message-bubble {
+              position: relative;
+              max-width: 85%;
+              border-radius: 12px;
+            }
+
+            .message-bubble::before {
               content: '';
               position: absolute;
               top: 50%;
               transform: translateY(-50%);
-              width: 0;
-              height: 0;
-              border-style: solid;
+              width: 8px;
+              height: 16px;
             }
 
-            /* Sender message tail (left side) */
-            .message-bubble.bg-\[#00a884\]::after {
-              left: -8px;
-              border-width: 8px 8px 8px 0;
-              border-color: transparent #00a884 transparent transparent;
+            /* Sender message (arrow on left) */
+            .message-bubble.bg-\[#00a884\] {
+              border-top-left-radius: 0;
+            }
+            
+            .message-bubble.bg-\[#00a884\]::before {
+              left: -7px;
+              background-color: #00a884;
+              clip-path: polygon(100% 50%, 100% 0, 0 0, 0 100%, 100% 100%);
             }
 
-            /* Receiver message tail (right side) */
-            .message-bubble.bg-\[#202c33\]::after {
-              right: -8px;
-              border-width: 8px 0 8px 8px;
-              border-color: transparent transparent transparent #202c33;
+            /* Receiver message (arrow on right) */
+            .message-bubble.bg-\[#202c33\] {
+              border-top-right-radius: 0;
+            }
+
+            .message-bubble.bg-\[#202c33\]::before {
+              right: -7px;
+              background-color: #202c33;
+              clip-path: polygon(0 50%, 0 0, 100% 0, 100% 100%, 0 100%);
+            }
+
+            @media (min-width: 768px) {
+              .message-bubble {
+                max-width: 65%;
+              }
             }
           `}</style>
 
