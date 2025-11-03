@@ -110,21 +110,35 @@ const SettingsPage = () => {
 
   const ToggleSwitch = ({ checked, onChange, label, description }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex-1">
-        {/* label/description rendered by caller in this page's layout */}
+      <div className="flex-1 pr-4">
+        <label className="text-sm font-medium cursor-pointer select-none">{label}</label>
+        {description && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {description}
+          </p>
+        )}
       </div>
-
-      <label className="relative inline-block w-12 h-6 transition duration-200 ease-in-out cursor-pointer flex-shrink-0">
+      <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out flex-shrink-0">
         <input
           type="checkbox"
           checked={checked}
           onChange={onChange}
           className="sr-only peer"
-          aria-checked={checked}
+          id={`toggle-${label}`}
         />
-        <span className={`block w-12 h-6 rounded-full transition-colors ${checked ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"}`} />
-        <span className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-6`} />
-      </label>
+        <label
+          htmlFor={`toggle-${label}`}
+          className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
+            checked ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"
+          }`}
+        >
+          <div
+            className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
+              checked ? "transform translate-x-6" : ""
+            }`}
+          />
+        </label>
+      </div>
     </div>
   );
 
@@ -194,14 +208,13 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen w-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
       {/* Header */}
-  <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-[110]">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40">
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate("/")}
-                className="text-black dark:text-white p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors relative z-[111] pointer-events-auto"
-                aria-label="Back"
+                className="text-black dark:text-white p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
