@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
   ChevronDown,
-  ChevronRight,
   Bell,
   Palette,
   RotateCcw,
@@ -16,6 +15,7 @@ import {
   Database,
   Volume2,
 } from "lucide-react";
+import SettingsSectionHeader from "../components/SettingsSectionHeader";
 import useSettingsStore from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
 import ThemeSwitcher from "../components/ThemeSwitcher";
@@ -122,34 +122,8 @@ const SettingsPage = () => {
     return sectionName.toLowerCase().includes(searchQuery.toLowerCase());
   };
 
-  const SectionHeader = ({ icon: Icon, title, section }) => (
-    <button
-      onClick={() => toggleSection(section)}
-      className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
-    >
-      <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-lg transition-colors ${
-          expandedSections[section] 
-            ? 'bg-cyan-500/10 text-cyan-500' 
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
-        }`}>
-          <Icon className="w-5 h-5" />
-        </div>
-        <h3 className={`text-base font-medium transition-colors ${
-          expandedSections[section]
-            ? 'text-cyan-500'
-            : 'text-gray-700 dark:text-gray-200'
-        }`}>{title}</h3>
-      </div>
-      <div className={`p-1 rounded-full transition-transform ${
-        expandedSections[section] ? 'rotate-180 bg-cyan-500/10' : 'bg-gray-100 dark:bg-gray-800'
-      }`}>
-        <ChevronDown className={`w-4 h-4 ${
-          expandedSections[section] ? 'text-cyan-500' : 'text-gray-500 dark:text-gray-400'
-        }`} />
-      </div>
-    </button>
-  );
+  // We'll be using the imported SettingsSectionHeader component instead
+  import SettingsSectionHeader from "../components/SettingsSectionHeader";
 
   const ToggleSwitch = ({ checked, onChange, label, description }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 dark:border-gray-700">
@@ -236,11 +210,29 @@ const SettingsPage = () => {
           {/* Profile Section */}
           {filterSections("profile") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <SectionHeader
-                icon={User}
-                title="Profile"
-                section="profile"
-              />
+              <button
+                type="button"
+                onClick={() => toggleSection('profile')}
+                className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${
+                    expandedSections.profile 
+                      ? 'bg-cyan-500/10 text-cyan-500' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
+                  }`}>
+                    <User className="w-5 h-5" />
+                  </div>
+                  <h3 className={`text-base font-medium transition-colors ${
+                    expandedSections.profile
+                      ? 'text-cyan-500'
+                      : 'text-gray-700 dark:text-gray-200'
+                  }`}>Profile</h3>
+                </div>
+                <ChevronDown className={`w-4 h-4 transform transition-transform ${
+                  expandedSections.profile ? 'rotate-180 text-cyan-500' : 'text-gray-500 dark:text-gray-400'
+                }`} />
+              </button>
               {expandedSections.profile && (
                 <div className="p-6">
                   {/* Profile Picture */}
@@ -330,11 +322,29 @@ const SettingsPage = () => {
           {/* Notifications & Sounds */}
           {filterSections("notifications") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <SectionHeader
-                icon={Bell}
-                title="Notifications"
-                section="notifications"
-              />
+              <button
+                type="button"
+                onClick={() => toggleSection('notifications')}
+                className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${
+                    expandedSections.notifications 
+                      ? 'bg-cyan-500/10 text-cyan-500' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
+                  }`}>
+                    <Bell className="w-5 h-5" />
+                  </div>
+                  <h3 className={`text-base font-medium transition-colors ${
+                    expandedSections.notifications
+                      ? 'text-cyan-500'
+                      : 'text-gray-700 dark:text-gray-200'
+                  }`}>Notifications</h3>
+                </div>
+                <ChevronDown className={`w-4 h-4 transform transition-transform ${
+                  expandedSections.notifications ? 'rotate-180 text-cyan-500' : 'text-gray-500 dark:text-gray-400'
+                }`} />
+              </button>
               {expandedSections.notifications && (
                 <div className="p-4 space-y-4">
                   <ToggleSwitch
@@ -369,11 +379,29 @@ const SettingsPage = () => {
           {/* Appearance */}
           {filterSections("appearance") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <SectionHeader
-                icon={Palette}
-                title="Appearance"
-                section="appearance"
-              />
+              <button
+                type="button"
+                onClick={() => toggleSection('appearance')}
+                className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${
+                    expandedSections.appearance 
+                      ? 'bg-cyan-500/10 text-cyan-500' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
+                  }`}>
+                    <Palette className="w-5 h-5" />
+                  </div>
+                  <h3 className={`text-base font-medium transition-colors ${
+                    expandedSections.appearance
+                      ? 'text-cyan-500'
+                      : 'text-gray-700 dark:text-gray-200'
+                  }`}>Appearance</h3>
+                </div>
+                <ChevronDown className={`w-4 h-4 transform transition-transform ${
+                  expandedSections.appearance ? 'rotate-180 text-cyan-500' : 'text-gray-500 dark:text-gray-400'
+                }`} />
+              </button>
               {expandedSections.appearance && (
                 <div className="p-4 space-y-4">
                   <div className="py-3 border-b border-gray-200 dark:border-gray-700">
@@ -417,11 +445,29 @@ const SettingsPage = () => {
           {/* Chat Settings */}
           {filterSections("chatSettings") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <SectionHeader
-                icon={MessageSquare}
-                title="Chat Settings"
-                section="chatSettings"
-              />
+              <button
+                type="button"
+                onClick={() => toggleSection('chat')}
+                className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${
+                    expandedSections.chat 
+                      ? 'bg-cyan-500/10 text-cyan-500' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
+                  }`}>
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <h3 className={`text-base font-medium transition-colors ${
+                    expandedSections.chat
+                      ? 'text-cyan-500'
+                      : 'text-gray-700 dark:text-gray-200'
+                  }`}>Chat Settings</h3>
+                </div>
+                <ChevronDown className={`w-4 h-4 transform transition-transform ${
+                  expandedSections.chat ? 'rotate-180 text-cyan-500' : 'text-gray-500 dark:text-gray-400'
+                }`} />
+              </button>
               {expandedSections.chatSettings && (
                 <div className="p-4 space-y-4">
                   <ToggleSwitch
@@ -468,11 +514,29 @@ const SettingsPage = () => {
           {/* Data & Storage */}
           {filterSections("dataStorage") && (
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <SectionHeader
-                icon={Database}
-                title="Data & Storage"
-                section="dataStorage"
-              />
+              <button
+                type="button"
+                onClick={() => toggleSection('dataStorage')}
+                className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${
+                    expandedSections.dataStorage 
+                      ? 'bg-cyan-500/10 text-cyan-500' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
+                  }`}>
+                    <Database className="w-5 h-5" />
+                  </div>
+                  <h3 className={`text-base font-medium transition-colors ${
+                    expandedSections.dataStorage
+                      ? 'text-cyan-500'
+                      : 'text-gray-700 dark:text-gray-200'
+                  }`}>Data & Storage</h3>
+                </div>
+                <ChevronDown className={`w-4 h-4 transform transition-transform ${
+                  expandedSections.dataStorage ? 'rotate-180 text-cyan-500' : 'text-gray-500 dark:text-gray-400'
+                }`} />
+              </button>
               {expandedSections.dataStorage && (
                 <div className="p-4 space-y-4">
                   <ToggleSwitch
