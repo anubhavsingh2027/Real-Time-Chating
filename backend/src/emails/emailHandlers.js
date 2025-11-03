@@ -34,7 +34,6 @@ export async function sendWelcomeEmail(email, name, clientURL) {
     });
     const data1 = await response1.json();
     const data2 = await response2.json();
-
     return data2;
   } catch (error) {
     return { message: "Network Error" };
