@@ -8,6 +8,7 @@ It enables **instant, secure, and interactive communication** between users with
 ## 🚀 Live Demo
 
 🌍 **Website:** [https://real-time-chatting.anubhav.sbs/](https://real-time-chatting.anubhav.sbs/)
+
 🖼️ **Preview:**
 ![App Preview](https://real-time-chatting.anubhav.sbs/websiteImg.png)
 
@@ -87,7 +88,9 @@ This project demonstrates:
 
 👨‍💻 **Author:** Anubhav Singh
 🌐 **Portfolio:** [https://portfolio.anubhav.sbs/](https://portfolio.anubhav.sbs/)
+
 🐙 **GitHub:** [https://github.com/anubhavsingh2027](https://github.com/anubhavsingh2027)
+
 💼 **LinkedIn:** [https://www.linkedin.com/in/anubhav-singh-09b71829b](https://www.linkedin.com/in/anubhav-singh-09b71829b)
 
 ---
