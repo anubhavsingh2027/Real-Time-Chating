@@ -49,7 +49,6 @@ export function createWelcomeEmailTemplate(name, clientURL) {
   `;
 }
 
-
 export function newCustomer(userName, email) {
   return `
   <!DOCTYPE html>
