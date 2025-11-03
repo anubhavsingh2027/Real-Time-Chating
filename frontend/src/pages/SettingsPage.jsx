@@ -12,6 +12,9 @@ import {
   Camera,
   User,
   Mail,
+  MessageSquare,
+  Database,
+  Volume2,
 } from "lucide-react";
 import useSettingsStore from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
@@ -30,6 +33,11 @@ const SettingsPage = () => {
     profile: true,
     notifications: false,
     appearance: false,
+    privacy: false,
+    chatSettings: false,
+    dataStorage: false,
+    accessibility: false,
+    languageRegion: false,
   });
 
   const toggleSection = (section) => {
@@ -117,17 +125,29 @@ const SettingsPage = () => {
   const SectionHeader = ({ icon: Icon, title, section }) => (
     <button
       onClick={() => toggleSection(section)}
-      className="flex items-center justify-between w-full p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+      className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
     >
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Icon className="w-5 h-5 text-blue-500" />
-        <h3 className="text-sm sm:text-base font-semibold">{title}</h3>
+      <div className="flex items-center gap-3">
+        <div className={`p-2 rounded-lg transition-colors ${
+          expandedSections[section] 
+            ? 'bg-cyan-500/10 text-cyan-500' 
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
+        }`}>
+          <Icon className="w-5 h-5" />
+        </div>
+        <h3 className={`text-base font-medium transition-colors ${
+          expandedSections[section]
+            ? 'text-cyan-500'
+            : 'text-gray-700 dark:text-gray-200'
+        }`}>{title}</h3>
       </div>
-      {expandedSections[section] ? (
-        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-      ) : (
-        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-      )}
+      <div className={`p-1 rounded-full transition-transform ${
+        expandedSections[section] ? 'rotate-180 bg-cyan-500/10' : 'bg-gray-100 dark:bg-gray-800'
+      }`}>
+        <ChevronDown className={`w-4 h-4 ${
+          expandedSections[section] ? 'text-cyan-500' : 'text-gray-500 dark:text-gray-400'
+        }`} />
+      </div>
     </button>
   );
 
@@ -316,7 +336,7 @@ const SettingsPage = () => {
                 section="notifications"
               />
               {expandedSections.notifications && (
-                <div className="p-4 space-y-1">
+                <div className="p-4 space-y-4">
                   <ToggleSwitch
                     checked={settings.notifications}
                     onChange={settings.toggleNotifications}
@@ -328,6 +348,18 @@ const SettingsPage = () => {
                     onChange={settings.toggleDesktopNotifications}
                     label="Desktop Notifications"
                     description="Show notifications on your desktop"
+                  />
+                  <ToggleSwitch
+                    checked={settings.notificationSound}
+                    onChange={settings.toggleNotificationSound}
+                    label="Notification Sound"
+                    description="Play sound when receiving notifications"
+                  />
+                  <ToggleSwitch
+                    checked={settings.notificationPreview}
+                    onChange={settings.toggleNotificationPreview}
+                    label="Message Preview"
+                    description="Show message content in notifications"
                   />
                 </div>
               )}
@@ -343,7 +375,7 @@ const SettingsPage = () => {
                 section="appearance"
               />
               {expandedSections.appearance && (
-                <div className="p-4 space-y-1">
+                <div className="p-4 space-y-4">
                   <div className="py-3 border-b border-gray-200 dark:border-gray-700">
                     <ThemeSwitcher />
                   </div>
@@ -376,6 +408,95 @@ const SettingsPage = () => {
                     onChange={settings.toggleAnimations}
                     label="Animations"
                     description="Enable smooth animations and transitions"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Chat Settings */}
+          {filterSections("chatSettings") && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
+              <SectionHeader
+                icon={MessageSquare}
+                title="Chat Settings"
+                section="chatSettings"
+              />
+              {expandedSections.chatSettings && (
+                <div className="p-4 space-y-4">
+                  <ToggleSwitch
+                    checked={settings.enterToSend}
+                    onChange={settings.toggleEnterToSend}
+                    label="Press Enter to Send"
+                    description="Send messages by pressing Enter key"
+                  />
+                  <ToggleSwitch
+                    checked={settings.showTimestamps}
+                    onChange={settings.toggleShowTimestamps}
+                    label="Show Timestamps"
+                    description="Display message timestamps"
+                  />
+                  <ToggleSwitch
+                    checked={settings.autoScroll}
+                    onChange={settings.toggleAutoScroll}
+                    label="Auto-scroll"
+                    description="Automatically scroll to new messages"
+                  />
+                  <ToggleSwitch
+                    checked={settings.showMessageStatus}
+                    onChange={settings.toggleShowMessageStatus}
+                    label="Message Status"
+                    description="Show sent, delivered, and read status"
+                  />
+                  <ToggleSwitch
+                    checked={settings.soundEffects}
+                    onChange={settings.toggleSoundEffects}
+                    label="Sound Effects"
+                    description="Play sounds for messages and notifications"
+                  />
+                  <Select
+                    label="Keyboard Sound"
+                    value={settings.keyboardSound}
+                    onChange={(e) => settings.setKeyboardSound(e.target.value)}
+                    options={keyboardSoundOptions}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Data & Storage */}
+          {filterSections("dataStorage") && (
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
+              <SectionHeader
+                icon={Database}
+                title="Data & Storage"
+                section="dataStorage"
+              />
+              {expandedSections.dataStorage && (
+                <div className="p-4 space-y-4">
+                  <ToggleSwitch
+                    checked={settings.autoDownloadImages}
+                    onChange={settings.toggleAutoDownloadImages}
+                    label="Auto Download Images"
+                    description="Automatically download images in chats"
+                  />
+                  <ToggleSwitch
+                    checked={settings.compressImages}
+                    onChange={settings.toggleCompressImages}
+                    label="Compress Images"
+                    description="Compress images before sending"
+                  />
+                  <Select
+                    label="Storage Limit"
+                    value={settings.storageLimit}
+                    onChange={(e) => settings.setStorageLimit(e.target.value)}
+                    options={[
+                      { value: "500MB", label: "500 MB" },
+                      { value: "1GB", label: "1 GB" },
+                      { value: "2GB", label: "2 GB" },
+                      { value: "5GB", label: "5 GB" },
+                    ]}
                   />
                 </div>
               )}
