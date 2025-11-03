@@ -29,7 +29,7 @@ const SettingsPage = () => {
   const [expandedSections, setExpandedSections] = useState({
     profile: true,
     notifications: false,
-    appearance: false
+    appearance: false,
   });
 
   const toggleSection = (section) => {
@@ -73,40 +73,63 @@ const SettingsPage = () => {
     { value: "minimal", label: "Minimal" },
   ];
 
-  const profilePhotoVisibilityOptions = [
-    { value: "everyone", label: "Everyone" },
-    { value: "contacts", label: "My Contacts" },
-    { value: "nobody", label: "Nobody" },
-  ];
+  const handleResetSettings = () => {
+    if (window.confirm("Are you sure you want to reset all settings to default values?")) {
+      settings.resetSettings();
+      toast.success("Settings reset to defaults");
+    }
+  };
 
-  const storageLimitOptions = [
-    { value: "500MB", label: "500 MB" },
-    { value: "1GB", label: "1 GB" },
-    { value: "2GB", label: "2 GB" },
-    { value: "5GB", label: "5 GB" },
-    { value: "unlimited", label: "Unlimited" },
-  ];
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const languageOptions = [
-    { value: "english", label: "English" },
-    { value: "spanish", label: "Spanish" },
-    { value: "french", label: "French" },
-    { value: "german", label: "German" },
-    { value: "hindi", label: "Hindi" },
-    { value: "chinese", label: "Chinese" },
-    { value: "japanese", label: "Japanese" },
-  ];
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
 
-  const timeFormatOptions = [
-    { value: "12h", label: "12 Hour" },
-    { value: "24h", label: "24 Hour" },
-  ];
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
 
-  const dateFormatOptions = [
-    { value: "MM/DD/YYYY", label: "MM/DD/YYYY" },
-    { value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
-    { value: "YYYY-MM-DD", label: "YYYY-MM-DD" },
-  ];
+    setIsUpdatingProfile(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        await updateProfile({ profilePic: reader.result });
+      } catch (error) {
+        console.error("Profile update error:", error);
+        toast.error(error.response?.data?.message || "Failed to update profile picture");
+      } finally {
+        setIsUpdatingProfile(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const filterSections = (sectionName) => {
+    if (!searchQuery) return true;
+    return sectionName.toLowerCase().includes(searchQuery.toLowerCase());
+  };
+
+  const SectionHeader = ({ icon: Icon, title, section }) => (
+    <button
+      onClick={() => toggleSection(section)}
+      className="flex items-center justify-between w-full p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+    >
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Icon className="w-5 h-5 text-blue-500" />
+        <h3 className="text-sm sm:text-base font-semibold">{title}</h3>
+      </div>
+      {expandedSections[section] ? (
+        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
+      ) : (
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+      )}
+    </button>
+  );
 
   const ToggleSwitch = ({ checked, onChange, label, description }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 dark:border-gray-700">
@@ -142,98 +165,37 @@ const SettingsPage = () => {
     </div>
   );
 
-  const SectionHeader = ({ icon: Icon, title, section }) => (
-    <button
-      onClick={() => toggleSection(section)}
-      className="flex items-center justify-between w-full p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
-    >
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Icon className="w-5 h-5 text-blue-500" />
-        <h3 className="text-sm sm:text-base font-semibold">{title}</h3>
-      </div>
-      {expandedSections[section] ? (
-        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-      ) : (
-        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-      )}
-    </button>
-  );
-
-  const handleResetSettings = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to reset all settings to default values?"
-      )
-    ) {
-      settings.resetSettings();
-      toast.success("Settings reset to defaults");
-    }
-  };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
-      return;
-    }
-
-    setIsUpdatingProfile(true);
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      try {
-        await updateProfile({ profilePic: reader.result });
-        
-      } catch (error) {
-        console.error("Profile update error:", error);
-        toast.error(error.response?.data?.message || "Failed to update profile picture");
-      } finally {
-        setIsUpdatingProfile(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const filterSections = (sectionName) => {
-    if (!searchQuery) return true;
-    return sectionName.toLowerCase().includes(searchQuery.toLowerCase());
-  };
-
   return (
     <div className="min-h-screen w-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-50">
-        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-3">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0">
+        <nav className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center h-16">
+            <div className="flex-none">
               <button
                 onClick={() => navigate("/")}
-                className="text-black dark:text-white p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors relative z-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="inline-flex items-center justify-center w-10 h-10 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                aria-label="Go back"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
-                  <SettingsIcon className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">Settings</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-                    {authUser?.fullName}
-                  </p>
-                </div>
+            </div>
+            
+            <div className="flex items-center gap-3 ml-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                <SettingsIcon className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">Settings</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+                  {authUser?.fullName}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Search Bar */}
-          <div className="pb-4">
+          <div className="py-4">
             <div className="relative max-w-3xl mx-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
               <input
@@ -245,12 +207,11 @@ const SettingsPage = () => {
               />
             </div>
           </div>
-        </div>
-      </div>
+        </nav>
+      </header>
 
       {/* Settings Content */}
       <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 pb-32">
-        {/* Settings sections in a responsive grid */}
         <div className="w-full mx-auto space-y-4 sm:space-y-6 max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Profile Section */}
           {filterSections("profile") && (
@@ -420,19 +381,11 @@ const SettingsPage = () => {
               )}
             </div>
           )}
-
-          {/* Data & Storage removed */}
-
-          {/* Accessibility removed */}
-
-          {/* Language & Region removed */}
-
-          {/* Advanced removed */}
         </div>
       </div>
 
       {/* Fixed Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
           <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
