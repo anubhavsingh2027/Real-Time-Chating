@@ -15,7 +15,7 @@ import {
   Database,
   Volume2,
 } from "lucide-react";
-import SettingsSectionHeader from "../components/SettingsSectionHeader";
+
 import useSettingsStore from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
 import ThemeSwitcher from "../components/ThemeSwitcher";
@@ -33,11 +33,8 @@ const SettingsPage = () => {
     profile: true,
     notifications: false,
     appearance: false,
-    privacy: false,
-    chatSettings: false,
+    chat: false,
     dataStorage: false,
-    accessibility: false,
-    languageRegion: false,
   });
 
   const toggleSection = (section) => {
@@ -122,8 +119,7 @@ const SettingsPage = () => {
     return sectionName.toLowerCase().includes(searchQuery.toLowerCase());
   };
 
-  // We'll be using the imported SettingsSectionHeader component instead
-  import SettingsSectionHeader from "../components/SettingsSectionHeader";
+  // Toggle Switch Component for Settings
 
   const ToggleSwitch = ({ checked, onChange, label, description }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 dark:border-gray-700">
