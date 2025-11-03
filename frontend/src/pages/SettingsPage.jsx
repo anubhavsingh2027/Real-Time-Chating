@@ -110,35 +110,21 @@ const SettingsPage = () => {
 
   const ToggleSwitch = ({ checked, onChange, label, description }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex-1 pr-4">
-        <label className="text-sm font-medium cursor-pointer select-none">{label}</label>
-        {description && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {description}
-          </p>
-        )}
+      <div className="flex-1">
+        {/* label/description rendered by caller in this page's layout */}
       </div>
-      <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out flex-shrink-0">
+
+      <label className="relative inline-block w-12 h-6 transition duration-200 ease-in-out cursor-pointer flex-shrink-0">
         <input
           type="checkbox"
           checked={checked}
           onChange={onChange}
           className="sr-only peer"
-          id={`toggle-${label}`}
+          aria-checked={checked}
         />
-        <label
-          htmlFor={`toggle-${label}`}
-          className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
-            checked ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"
-          }`}
-        >
-          <div
-            className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-              checked ? "transform translate-x-6" : ""
-            }`}
-          />
-        </label>
-      </div>
+        <span className={`block w-12 h-6 rounded-full transition-colors ${checked ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"}`} />
+        <span className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-6`} />
+      </label>
     </div>
   );
 

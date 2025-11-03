@@ -115,33 +115,32 @@ const SettingsPanel = ({ onBack }) => {
   const ToggleSwitch = ({ checked, onChange, label, description }) => (
     <div className="flex items-start justify-between py-3 border-b border-gray-200 dark:border-gray-700">
       <div className="flex-1">
-        <label className="text-sm font-medium">{label}</label>
+        <span className="text-sm font-medium">{label}</span>
         {description && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {description}
           </p>
         )}
       </div>
-      <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
+
+      {/* Use native label/input so clicks always reach the checkbox even when overlays exist */}
+      <label className="relative inline-block w-12 h-6 transition duration-200 ease-in-out cursor-pointer">
         <input
           type="checkbox"
           checked={checked}
           onChange={onChange}
-          className="sr-only"
+          className="sr-only peer"
+          aria-checked={checked}
         />
-        <div
-          onClick={onChange}
-          className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
+        <span
+          className={`block w-12 h-6 rounded-full transition-colors ${
             checked ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"
           }`}
-        >
-          <div
-            className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-              checked ? "transform translate-x-6" : ""
-            }`}
-          />
-        </div>
-      </div>
+        />
+        <span
+          className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-6`}
+        />
+      </label>
     </div>
   );
 
