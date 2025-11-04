@@ -234,7 +234,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             }`}
           >
             {message.image && (
-              <div 
+              <div
                 className="inline-block w-[280px] aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-black/5 dark:bg-white/5"
               >
                 <div className="w-full h-full flex items-center justify-center">
