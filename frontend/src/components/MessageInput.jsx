@@ -73,8 +73,32 @@ function MessageInput() {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
+  const quickMessages = [
+    "Hello!",
+    "How are you?",
+    "Meet up soon?"
+  ];
+
+  const sendQuickMessage = (message) => {
+    if (isSoundEnabled) playRandomKeyStrokeSound();
+    sendMessage({ text: message });
+  };
+
   return (
     <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border-t border-gray-200 dark:border-slate-700 transition-all duration-300">
+      {/* Quick Messages */}
+      <div className="flex items-center gap-2 p-3 overflow-x-auto max-w-3xl mx-auto border-b border-gray-200 dark:border-slate-700">
+        <span className="text-xs text-gray-500 dark:text-gray-400 flex-none">Quick messages:</span>
+        {quickMessages.map((msg) => (
+          <button
+            key={msg}
+            onClick={() => sendQuickMessage(msg)}
+            className="px-4 py-2 text-sm font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:text-emerald-700 dark:hover:text-emerald-200 transition-all duration-200 border border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-700 whitespace-nowrap flex-none shadow-sm hover:shadow-md"
+          >
+            {msg}
+          </button>
+        ))}
+      </div>
 
       {/* Image Previews */}
       {imagePreviews.length > 0 && (
