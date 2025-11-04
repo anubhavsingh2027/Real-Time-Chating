@@ -32,11 +32,14 @@ const useSettingsStore = create(
       fontSize: "medium",
       setFontSize: (size) => set((state) => ({ fontSize: size })),
       messageDensity: "comfortable",
-      setMessageDensity: (density) => set((state) => ({ messageDensity: density })),
+      setMessageDensity: (density) =>
+        set((state) => ({ messageDensity: density })),
       animations: true,
-      toggleAnimations: () => set((state) => ({ animations: !state.animations })),
+      toggleAnimations: () =>
+        set((state) => ({ animations: !state.animations })),
       chatBackground: "default",
-      setChatBackground: (background) => set((state) => ({ chatBackground: background })),
+      setChatBackground: (background) =>
+        set((state) => ({ chatBackground: background })),
       bubbleStyle: "rounded",
       setBubbleStyle: (style) => set((state) => ({ bubbleStyle: style })),
 
