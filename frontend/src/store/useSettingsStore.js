@@ -58,8 +58,6 @@ const useSettingsStore = create(
       setProfilePhotoVisibility: (visibility) =>
         set({ profilePhotoVisibility: visibility }),
 
-
-
       // Accessibility
       highContrast: false,
       toggleHighContrast: () =>
