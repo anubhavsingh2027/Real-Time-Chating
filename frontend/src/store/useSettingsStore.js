@@ -28,18 +28,17 @@ const useSettingsStore = create(
 
       // Appearance
       theme: "dark",
-      setTheme: (theme) => set({ theme }),
+      setTheme: (theme) => set((state) => ({ theme })),
       fontSize: "medium",
-      setFontSize: (size) => set({ fontSize: size }),
+      setFontSize: (size) => set((state) => ({ fontSize: size })),
       messageDensity: "comfortable",
-      setMessageDensity: (density) => set({ messageDensity: density }),
+      setMessageDensity: (density) => set((state) => ({ messageDensity: density })),
       animations: true,
-      toggleAnimations: () =>
-        set((state) => ({ animations: !state.animations })),
+      toggleAnimations: () => set((state) => ({ animations: !state.animations })),
       chatBackground: "default",
-      setChatBackground: (background) => set({ chatBackground: background }),
+      setChatBackground: (background) => set((state) => ({ chatBackground: background })),
       bubbleStyle: "rounded",
-      setBubbleStyle: (style) => set({ bubbleStyle: style }),
+      setBubbleStyle: (style) => set((state) => ({ bubbleStyle: style })),
 
       // Privacy
       onlineStatus: true,
