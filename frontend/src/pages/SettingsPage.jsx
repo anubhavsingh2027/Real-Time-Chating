@@ -154,7 +154,7 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen w-full bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40">
         <nav className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <div className="flex-none">
@@ -197,7 +197,7 @@ const SettingsPage = () => {
       </header>
 
       {/* Settings Content */}
-      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 pb-32">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 pb-32 relative z-20">
         <div className="w-full mx-auto space-y-4 sm:space-y-6 max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Profile Section */}
           {filterSections("profile") && (
@@ -441,7 +441,7 @@ const SettingsPage = () => {
       </div>
 
       {/* Fixed Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30">
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
           <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
