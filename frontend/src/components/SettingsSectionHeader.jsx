@@ -9,8 +9,8 @@ const SettingsSectionHeader = ({ icon: Icon, title, isExpanded, onToggle }) => {
     >
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-lg transition-colors ${
-          isExpanded 
-            ? 'bg-cyan-500/10 text-cyan-500' 
+          isExpanded
+            ? 'bg-cyan-500/10 text-cyan-500'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
         }`}>
           <Icon className="w-5 h-5" />

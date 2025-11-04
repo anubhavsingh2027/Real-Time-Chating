@@ -58,41 +58,7 @@ const useSettingsStore = create(
       setProfilePhotoVisibility: (visibility) =>
         set({ profilePhotoVisibility: visibility }),
 
-      // Chat Settings
-      enterToSend: true,
-      toggleEnterToSend: () =>
-        set((state) => ({ enterToSend: !state.enterToSend })),
-      showTimestamps: true,
-      toggleShowTimestamps: () =>
-        set((state) => ({ showTimestamps: !state.showTimestamps })),
-      autoScroll: true,
-      toggleAutoScroll: () =>
-        set((state) => ({ autoScroll: !state.autoScroll })),
-      showMessageStatus: true,
-      toggleShowMessageStatus: () =>
-        set((state) => ({ showMessageStatus: !state.showMessageStatus })),
-      groupMessagesByDate: true,
-      toggleGroupMessagesByDate: () =>
-        set((state) => ({ groupMessagesByDate: !state.groupMessagesByDate })),
-      showSenderName: true,
-      toggleShowSenderName: () =>
-        set((state) => ({ showSenderName: !state.showSenderName })),
 
-      // Data & Storage
-      autoDownloadImages: true,
-      toggleAutoDownloadImages: () =>
-        set((state) => ({ autoDownloadImages: !state.autoDownloadImages })),
-      autoDownloadVideos: false,
-      toggleAutoDownloadVideos: () =>
-        set((state) => ({ autoDownloadVideos: !state.autoDownloadVideos })),
-      autoDownloadFiles: false,
-      toggleAutoDownloadFiles: () =>
-        set((state) => ({ autoDownloadFiles: !state.autoDownloadFiles })),
-      compressImages: true,
-      toggleCompressImages: () =>
-        set((state) => ({ compressImages: !state.compressImages })),
-      storageLimit: "1GB",
-      setStorageLimit: (limit) => set({ storageLimit: limit }),
 
       // Accessibility
       highContrast: false,
@@ -151,17 +117,7 @@ const useSettingsStore = create(
           typingIndicator: true,
           lastSeenStatus: true,
           profilePhotoVisibility: "everyone",
-          enterToSend: true,
-          showTimestamps: true,
-          autoScroll: true,
-          showMessageStatus: true,
-          groupMessagesByDate: true,
-          showSenderName: true,
-          autoDownloadImages: true,
-          autoDownloadVideos: false,
-          autoDownloadFiles: false,
-          compressImages: true,
-          storageLimit: "1GB",
+
           highContrast: false,
           reduceMotion: false,
           screenReaderOptimized: false,

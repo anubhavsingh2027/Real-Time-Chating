@@ -11,8 +11,6 @@ import {
   Camera,
   User,
   Mail,
-  MessageSquare,
-  Database,
   Volume2,
 } from "lucide-react";
 
@@ -33,8 +31,6 @@ const SettingsPage = () => {
     profile: true,
     notifications: false,
     appearance: false,
-    chat: false,
-    dataStorage: false,
   });
 
   const toggleSection = (section) => {
@@ -170,7 +166,7 @@ const SettingsPage = () => {
                 <ChevronLeft className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="flex items-center gap-3 ml-3">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
                 <SettingsIcon className="w-6 h-6 text-white" />
@@ -213,8 +209,8 @@ const SettingsPage = () => {
               >
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg transition-colors ${
-                    expandedSections.profile 
-                      ? 'bg-cyan-500/10 text-cyan-500' 
+                    expandedSections.profile
+                      ? 'bg-cyan-500/10 text-cyan-500'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
                   }`}>
                     <User className="w-5 h-5" />
@@ -325,8 +321,8 @@ const SettingsPage = () => {
               >
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg transition-colors ${
-                    expandedSections.notifications 
-                      ? 'bg-cyan-500/10 text-cyan-500' 
+                    expandedSections.notifications
+                      ? 'bg-cyan-500/10 text-cyan-500'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
                   }`}>
                     <Bell className="w-5 h-5" />
@@ -382,8 +378,8 @@ const SettingsPage = () => {
               >
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg transition-colors ${
-                    expandedSections.appearance 
-                      ? 'bg-cyan-500/10 text-cyan-500' 
+                    expandedSections.appearance
+                      ? 'bg-cyan-500/10 text-cyan-500'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
                   }`}>
                     <Palette className="w-5 h-5" />
@@ -438,130 +434,9 @@ const SettingsPage = () => {
             </div>
           )}
 
-          {/* Chat Settings */}
-          {filterSections("chatSettings") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <button
-                type="button"
-                onClick={() => toggleSection('chat')}
-                className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg transition-colors ${
-                    expandedSections.chat 
-                      ? 'bg-cyan-500/10 text-cyan-500' 
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
-                  }`}>
-                    <MessageSquare className="w-5 h-5" />
-                  </div>
-                  <h3 className={`text-base font-medium transition-colors ${
-                    expandedSections.chat
-                      ? 'text-cyan-500'
-                      : 'text-gray-700 dark:text-gray-200'
-                  }`}>Chat Settings</h3>
-                </div>
-                <ChevronDown className={`w-4 h-4 transform transition-transform ${
-                  expandedSections.chat ? 'rotate-180 text-cyan-500' : 'text-gray-500 dark:text-gray-400'
-                }`} />
-              </button>
-              {expandedSections.chatSettings && (
-                <div className="p-4 space-y-4">
-                  <ToggleSwitch
-                    checked={settings.enterToSend}
-                    onChange={settings.toggleEnterToSend}
-                    label="Press Enter to Send"
-                    description="Send messages by pressing Enter key"
-                  />
-                  <ToggleSwitch
-                    checked={settings.showTimestamps}
-                    onChange={settings.toggleShowTimestamps}
-                    label="Show Timestamps"
-                    description="Display message timestamps"
-                  />
-                  <ToggleSwitch
-                    checked={settings.autoScroll}
-                    onChange={settings.toggleAutoScroll}
-                    label="Auto-scroll"
-                    description="Automatically scroll to new messages"
-                  />
-                  <ToggleSwitch
-                    checked={settings.showMessageStatus}
-                    onChange={settings.toggleShowMessageStatus}
-                    label="Message Status"
-                    description="Show sent, delivered, and read status"
-                  />
-                  <ToggleSwitch
-                    checked={settings.soundEffects}
-                    onChange={settings.toggleSoundEffects}
-                    label="Sound Effects"
-                    description="Play sounds for messages and notifications"
-                  />
-                  <Select
-                    label="Keyboard Sound"
-                    value={settings.keyboardSound}
-                    onChange={(e) => settings.setKeyboardSound(e.target.value)}
-                    options={keyboardSoundOptions}
-                  />
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* Data & Storage */}
-          {filterSections("dataStorage") && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden">
-              <button
-                type="button"
-                onClick={() => toggleSection('dataStorage')}
-                className="flex items-center justify-between w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg transition-colors ${
-                    expandedSections.dataStorage 
-                      ? 'bg-cyan-500/10 text-cyan-500' 
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-cyan-500'
-                  }`}>
-                    <Database className="w-5 h-5" />
-                  </div>
-                  <h3 className={`text-base font-medium transition-colors ${
-                    expandedSections.dataStorage
-                      ? 'text-cyan-500'
-                      : 'text-gray-700 dark:text-gray-200'
-                  }`}>Data & Storage</h3>
-                </div>
-                <ChevronDown className={`w-4 h-4 transform transition-transform ${
-                  expandedSections.dataStorage ? 'rotate-180 text-cyan-500' : 'text-gray-500 dark:text-gray-400'
-                }`} />
-              </button>
-              {expandedSections.dataStorage && (
-                <div className="p-4 space-y-4">
-                  <ToggleSwitch
-                    checked={settings.autoDownloadImages}
-                    onChange={settings.toggleAutoDownloadImages}
-                    label="Auto Download Images"
-                    description="Automatically download images in chats"
-                  />
-                  <ToggleSwitch
-                    checked={settings.compressImages}
-                    onChange={settings.toggleCompressImages}
-                    label="Compress Images"
-                    description="Compress images before sending"
-                  />
-                  <Select
-                    label="Storage Limit"
-                    value={settings.storageLimit}
-                    onChange={(e) => settings.setStorageLimit(e.target.value)}
-                    options={[
-                      { value: "500MB", label: "500 MB" },
-                      { value: "1GB", label: "1 GB" },
-                      { value: "2GB", label: "2 GB" },
-                      { value: "5GB", label: "5 GB" },
-                    ]}
-                  />
-                </div>
-              )}
-            </div>
-          )}
+
+
         </div>
       </div>
 
