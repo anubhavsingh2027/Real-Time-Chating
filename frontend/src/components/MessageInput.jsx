@@ -11,22 +11,53 @@ function MessageInput() {
   const fileInputRef = useRef(null);
   const { sendMessage, isSoundEnabled } = useChatStore();
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim() && imagePreviews.length === 0) return;
     if (isSoundEnabled) playRandomKeyStrokeSound();
 
-    sendMessage({
-      text: text.trim(),
-      image: imagePreviews.length > 0 ? imagePreviews[0].data : null,
-    });
+    // If there are images, send them one by one
+    if (imagePreviews.length > 0) {
+      const results = await Promise.allSettled(
+        imagePreviews.map(async (img) => {
+          const maxSize = 10 * 1024 * 1024; // 10MB
+          if (img.size > maxSize) {
+            throw new Error(`${img.name} is too large (max 10MB)`);
+          }
+          
+          try {
+            await sendMessage({
+              text: text.trim(),
+              image: img.data,
+            });
+            toast.success(`Image ${img.name} sent successfully`);
+            return true;
+          } catch (error) {
+            throw new Error(`Failed to send ${img.name}: ${error.message}`);
+          }
+        })
+      );
+
+      // Handle results
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          toast.error(result.reason.message);
+        }
+      });
+    } else {
+      // Send text-only message
+      await sendMessage({
+        text: text.trim(),
+        image: null,
+      });
+    }
 
     setText("");
     setImagePreviews([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
@@ -35,31 +66,42 @@ function MessageInput() {
       return;
     }
 
-    files.forEach((file) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const validFiles = [];
+
+    // Validate files first
+    for (const file of files) {
       if (!file.type.startsWith("image/")) {
         toast.error(`${file.name} is not an image`);
-        return;
+        continue;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} is too large (max 5MB)`);
-        return;
+      if (file.size > maxSize) {
+        toast.error(`${file.name} is too large (max 10MB)`);
+        continue;
       }
+      validFiles.push(file);
+    }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreviews((prev) => [
-          ...prev,
-          {
+    // Process valid files
+    const readFile = (file) => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve({
             id: Date.now() + Math.random(),
             name: file.name,
             size: file.size,
             data: reader.result,
-          },
-        ]);
-      };
-      reader.readAsDataURL(file);
-    });
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    };
 
+    // Read all valid files in parallel
+    const newPreviews = await Promise.all(validFiles.map(readFile));
+    
+    setImagePreviews(prev => [...prev, ...newPreviews]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
