@@ -234,14 +234,22 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
             }`}
           >
             {message.image && (
-              <div className="w-auto max-w-[60vw] sm:max-w-[40vw] md:max-w-[320px] rounded-lg overflow-hidden shadow-sm">
+              <div 
+                className="inline-block max-w-[min(320px,85vw)] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                style={{ maxHeight: '70vh' }}
+              >
                 <img
                   ref={imageRef}
                   src={message.image}
                   alt={message.text ? 'attachment' : 'image'}
                   onClick={() => setShowImageModal(true)}
                   onError={(e) => (e.currentTarget.style.display = 'none')}
-                  className="w-auto h-auto max-w-full max-h-[60vh] object-contain cursor-pointer block"
+                  className="w-auto h-auto max-w-full object-contain cursor-zoom-in hover:opacity-95 transition-opacity"
+                  style={{ 
+                    maxHeight: 'inherit',
+                    display: 'block',
+                    margin: '0 auto'
+                  }}
                 />
               </div>
             )}
