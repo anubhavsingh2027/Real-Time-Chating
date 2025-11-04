@@ -5,6 +5,41 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
 import useSettingsStore from "./useSettingsStore";
 
+// Function to filter out image data from messages for storage
+const filterMessagesForStorage = (messages) => {
+  return messages.map(msg => ({
+    ...msg,
+    image: msg.image ? true : false // Only store boolean indicating presence of image
+  }));
+};
+
+// Custom storage for persist middleware
+const customStorage = {
+  getItem: (name) => {
+    const str = localStorage.getItem(name);
+    if (!str) return null;
+    const data = JSON.parse(str);
+    return {
+      ...data,
+      state: {
+        ...data.state,
+        messages: [] // Don't load messages from storage to avoid size issues
+      }
+    };
+  },
+  setItem: (name, value) => {
+    const storageValue = {
+      ...value,
+      state: {
+        ...value.state,
+        messages: filterMessagesForStorage(value.state.messages)
+      }
+    };
+    localStorage.setItem(name, JSON.stringify(storageValue));
+  },
+  removeItem: (name) => localStorage.removeItem(name)
+};
+
 export const useChatStore = create(
   persist(
     (set, get) => ({
@@ -61,12 +96,14 @@ export const useChatStore = create(
         const { authUser, socket } = useAuthStore.getState();
 
         const tempId = `temp-${Date.now()}`;
+        
+        // Create a smaller optimistic message without actual image data
         const optimisticMessage = {
           _id: tempId,
           senderId: authUser._id,
           receiverId: selectedUser._id,
           text: messageData.text,
-          image: messageData.image,
+          image: messageData.image ? true : null, // Just store boolean for optimistic update
           replyTo: replyToMessage
             ? {
                 _id: replyToMessage._id,
@@ -79,13 +116,24 @@ export const useChatStore = create(
           isOptimistic: true,
         };
 
-        set({ messages: [...messages, optimisticMessage] });
+        // Update messages without storing image data in state
+        set({ 
+          messages: [...messages, optimisticMessage]
+        });
 
         try {
-          const payload = {
-            ...messageData,
+          // Compress image if necessary
+          let payload = {
+            text: messageData.text,
             replyTo: replyToMessage?._id || null,
           };
+
+          // Only include image if it exists
+          if (messageData.image) {
+            // You might want to add image compression here
+            payload.image = messageData.image;
+          }
+
           const res = await axiosInstance.post(
             `/messages/send/${selectedUser._id}`,
             payload
@@ -324,9 +372,11 @@ export const useChatStore = create(
     }),
     {
       name: "chat-store",
+      storage: customStorage,
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...persistedState,
+        messages: currentState.messages // Always use current messages
       }),
     }
   )
