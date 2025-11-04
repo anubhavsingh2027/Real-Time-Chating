@@ -92,28 +92,44 @@ function MessageInput() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {imagePreviews.map((img) => (
                 <div
                   key={img.id}
-                  className="relative rounded-xl overflow-hidden group border border-gray-300 dark:border-slate-700 hover:border-emerald-500 transition-all duration-200"
+                  className="relative aspect-square rounded-xl overflow-hidden group border border-gray-300 dark:border-slate-700 hover:border-emerald-500 transition-all duration-200 hover:shadow-lg"
                 >
+                  <div className="absolute inset-0 bg-black/5 dark:bg-black/20 group-hover:bg-black/0 transition-colors duration-200" />
                   <img
                     src={img.data}
                     alt={img.name}
-                    className="w-full h-28 sm:h-32 object-cover transform group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+                    onClick={() => {
+                      // Create full screen preview
+                      const preview = window.open("", "_blank");
+                      preview.document.write(`
+                        <style>
+                          body { margin: 0; background: rgba(0,0,0,0.9); height: 100vh; display: flex; align-items: center; justify-content: center; }
+                          img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+                        </style>
+                        <img src="${img.data}" alt="${img.name}" />
+                      `);
+                    }}
+                    style={{ cursor: 'zoom-in' }}
                   />
 
                   <button
-                    onClick={() => removeImage(img.id)}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(img.id);
+                    }}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
                   >
-                    <XIcon className="w-3.5 h-3.5" />
+                    <XIcon className="w-4 h-4" />
                   </button>
 
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-transparent to-transparent px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <p className="text-[11px] text-white truncate">{img.name}</p>
-                    <p className="text-[10px] text-gray-300">{formatFileSize(img.size)}</p>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <p className="text-sm text-white font-medium truncate mb-0.5">{img.name}</p>
+                    <p className="text-xs text-gray-300">{formatFileSize(img.size)}</p>
                   </div>
                 </div>
               ))}
@@ -122,11 +138,13 @@ function MessageInput() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-emerald-500 flex flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all"
+                  className="aspect-square rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-emerald-500 flex flex-col items-center justify-center gap-3 bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition-all hover:shadow-lg group"
                 >
-                  <PlusIcon className="w-6 h-6 text-gray-400 dark:text-slate-500" />
-                  <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">
-                    Add
+                  <div className="p-3 rounded-full bg-gray-100 dark:bg-slate-700 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/30 transition-colors">
+                    <PlusIcon className="w-6 h-6 text-gray-400 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-slate-400 font-medium group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    Add Image
                   </span>
                 </button>
               )}
