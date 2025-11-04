@@ -235,22 +235,18 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
           >
             {message.image && (
               <div 
-                className="inline-block max-w-[min(320px,85vw)] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                style={{ maxHeight: '70vh' }}
+                className="inline-block w-[280px] aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-black/5 dark:bg-white/5"
               >
-                <img
-                  ref={imageRef}
-                  src={message.image}
-                  alt={message.text ? 'attachment' : 'image'}
-                  onClick={() => setShowImageModal(true)}
-                  onError={(e) => (e.currentTarget.style.display = 'none')}
-                  className="w-auto h-auto max-w-full object-contain cursor-zoom-in hover:opacity-95 transition-opacity"
-                  style={{ 
-                    maxHeight: 'inherit',
-                    display: 'block',
-                    margin: '0 auto'
-                  }}
-                />
+                <div className="w-full h-full flex items-center justify-center">
+                  <img
+                    ref={imageRef}
+                    src={message.image}
+                    alt={message.text ? 'attachment' : 'image'}
+                    onClick={() => setShowImageModal(true)}
+                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                    className="max-w-full max-h-full w-auto h-auto object-contain cursor-zoom-in hover:opacity-95 transition-opacity"
+                  />
+                </div>
               </div>
             )}
 
