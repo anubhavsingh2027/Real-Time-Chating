@@ -7,9 +7,9 @@ import useSettingsStore from "./useSettingsStore";
 
 // Function to filter out image data from messages for storage
 const filterMessagesForStorage = (messages) => {
-  return messages.map(msg => ({
+  return messages.map((msg) => ({
     ...msg,
-    image: msg.image ? true : false // Only store boolean indicating presence of image
+    image: msg.image ? true : false, // Only store boolean indicating presence of image
   }));
 };
 
@@ -23,8 +23,8 @@ const customStorage = {
       ...data,
       state: {
         ...data.state,
-        messages: [] // Don't load messages from storage to avoid size issues
-      }
+        messages: [], // Don't load messages from storage to avoid size issues
+      },
     };
   },
   setItem: (name, value) => {
@@ -32,12 +32,12 @@ const customStorage = {
       ...value,
       state: {
         ...value.state,
-        messages: filterMessagesForStorage(value.state.messages)
-      }
+        messages: filterMessagesForStorage(value.state.messages),
+      },
     };
     localStorage.setItem(name, JSON.stringify(storageValue));
   },
-  removeItem: (name) => localStorage.removeItem(name)
+  removeItem: (name) => localStorage.removeItem(name),
 };
 
 export const useChatStore = create(
@@ -96,7 +96,7 @@ export const useChatStore = create(
         const { authUser, socket } = useAuthStore.getState();
 
         const tempId = `temp-${Date.now()}`;
-        
+
         // Create a smaller optimistic message without actual image data
         const optimisticMessage = {
           _id: tempId,
@@ -117,8 +117,8 @@ export const useChatStore = create(
         };
 
         // Update messages without storing image data in state
-        set({ 
-          messages: [...messages, optimisticMessage]
+        set({
+          messages: [...messages, optimisticMessage],
         });
 
         try {
@@ -376,7 +376,7 @@ export const useChatStore = create(
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...persistedState,
-        messages: currentState.messages // Always use current messages
+        messages: currentState.messages, // Always use current messages
       }),
     }
   )

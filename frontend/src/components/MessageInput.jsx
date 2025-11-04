@@ -24,16 +24,16 @@ function MessageInput() {
           if (img.size > maxSize) {
             throw new Error(`${img.name} is too large (max 10MB)`);
           }
-          
+
           try {
             await sendMessage({
               text: text.trim(),
               image: img.data,
             });
-            toast.success(`Image ${img.name} sent successfully`);
+
             return true;
           } catch (error) {
-            throw new Error(`Failed to send ${img.name}: ${error.message}`);
+            throw new Error(`Failed to send ${img.name}: image less than 10 mb`);
           }
         })
       );
@@ -100,7 +100,7 @@ function MessageInput() {
 
     // Read all valid files in parallel
     const newPreviews = await Promise.all(validFiles.map(readFile));
-    
+
     setImagePreviews(prev => [...prev, ...newPreviews]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };

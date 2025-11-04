@@ -7,6 +7,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import ConfirmDialog from './ConfirmDialog';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../store/useChatStore';
@@ -17,6 +18,7 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
   const [showReactionPopup, setShowReactionPopup] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showMenuButton, setShowMenuButton] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const longPressTimer = useRef(null);
   const bubbleRef = useRef(null);
   const imageRef = useRef(null);
@@ -116,11 +118,14 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
 
   const handleDelete = () => {
     if (!onDelete) return;
-    if (confirm('Delete this message?')) {
-      setShowActions(false);
-      setShowMenuButton(false);
-      onDelete(message._id);
-    }
+    setShowDeleteConfirm(true);
+    setShowActions(false);
+  };
+
+  const handleConfirmDelete = () => {
+    setShowMenuButton(false);
+    onDelete(message._id);
+    setShowDeleteConfirm(false);
   };
 
   const getStatusIcon = () => {
@@ -417,6 +422,17 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleConfirmDelete}
+        title="🗑️ Delete Message"
+        message="Are you sure you want to delete this message? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        intent="danger"
+      />
     </>
   );
 }
