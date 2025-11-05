@@ -102,7 +102,7 @@ function ChatPage() {
       {/* Desktop Layout */}
       <div className="hidden lg:block h-full">
         <BorderAnimatedContainer>
-          <div className="w-80 bg-gray-100/50 dark:bg-slate-800/50 backdrop-blur-sm flex flex-col">
+          <div className="w-80 bg-gray-100/50 dark:bg-slate-800/50 backdrop-blur-sm flex flex-col border-r border-white/10 dark:border-white/10">
             <div className="bg-emerald-600 dark:bg-slate-800 px-4 py-4 flex items-center justify-between border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
