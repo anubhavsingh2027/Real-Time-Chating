@@ -59,36 +59,10 @@ export const useChatStore = create(
       getAllContacts: async () => {
         set({ isUsersLoading: true });
         try {
-          // Check if we have an auth user first
-          const authUser = useAuthStore.getState().authUser;
-          if (!authUser) {
-            toast.error("Please login first");
-            return;
-          }
-
           const res = await axiosInstance.get("/messages/contacts");
-          if (res.data) {
-            set({ allContacts: res.data });
-          }
+          set({ allContacts: res.data });
         } catch (error) {
-          console.error("Contacts error:", error);
-          if (error.response?.status === 401) {
-            // Token might be expired, try to refresh auth
-            await useAuthStore.getState().checkAuth();
-            // Retry the request after auth check
-            try {
-              const retryRes = await axiosInstance.get("/messages/contacts");
-              if (retryRes.data) {
-                set({ allContacts: retryRes.data });
-              }
-            } catch (retryError) {
-              toast.error("Please try logging in again");
-              // Redirect to login if still unauthorized
-              window.location.href = "/login";
-            }
-          } else {
-            toast.error(error.response?.data?.message || "Failed to load contacts");
-          }
+          toast.error(error.response.data.message);
         } finally {
           set({ isUsersLoading: false });
         }
@@ -96,36 +70,10 @@ export const useChatStore = create(
       getMyChatPartners: async () => {
         set({ isUsersLoading: true });
         try {
-          // Check if we have an auth user first
-          const authUser = useAuthStore.getState().authUser;
-          if (!authUser) {
-            toast.error("Please login first");
-            return;
-          }
-
           const res = await axiosInstance.get("/messages/chats");
-          if (res.data) {
-            set({ chats: res.data });
-          }
+          set({ chats: res.data });
         } catch (error) {
-          console.error("Chat partners error:", error);
-          if (error.response?.status === 401) {
-            // Token might be expired, try to refresh auth
-            await useAuthStore.getState().checkAuth();
-            // Retry the request after auth check
-            try {
-              const retryRes = await axiosInstance.get("/messages/chats");
-              if (retryRes.data) {
-                set({ chats: retryRes.data });
-              }
-            } catch (retryError) {
-              toast.error("Please try logging in again");
-              // Redirect to login if still unauthorized
-              window.location.href = "/login";
-            }
-          } else {
-            toast.error(error.response?.data?.message || "Failed to load chats");
-          }
+          toast.error(error.response.data.message);
         } finally {
           set({ isUsersLoading: false });
         }
