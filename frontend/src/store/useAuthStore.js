@@ -5,8 +5,8 @@ import { io } from "socket.io-client";
 
 const BASE_URL =
   import.meta.env.MODE === "development"
-    ? "https://chatting.anubhav.sbs"
-    : "https://chatting.anubhav.sbs";
+    ? "https://careful-jayme-psit-84f63ed1.koyeb.app"
+    : "https://careful-jayme-psit-84f63ed1.koyeb.app";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
