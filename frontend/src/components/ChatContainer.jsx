@@ -33,7 +33,17 @@ function ChatContainer({ onBack }) {
   }, [selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
-    if (messageEndRef.current) {
+    if (!messageEndRef.current || messages.length === 0) return;
+    
+    const lastMessage = messages[messages.length - 1];
+    const isNewMessage = lastMessage && (
+      // Check if it's a fresh message (created in the last second)
+      new Date(lastMessage.createdAt).getTime() > Date.now() - 1000 ||
+      // Or if it's an optimistic message (being sent)
+      lastMessage.isOptimistic
+    );
+
+    if (isNewMessage) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
