@@ -207,11 +207,12 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 10 }}
               transition={{ duration: 0.2 }}
-              className="absolute z-50 pointer-events-auto"
+              className="absolute z-[100] transform origin-bottom"
               style={{
-                top: '-45px',
+                bottom: '100%',
                 left: isOwnMessage ? 'auto' : '0',
                 right: isOwnMessage ? '0' : 'auto',
+                marginBottom: '8px'
               }}
             >
               <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-1.5 flex items-center gap-0.5 ring-1 ring-black/5 dark:ring-white/10 scale-100 hover:scale-[1.02] transition-transform min-w-max">
