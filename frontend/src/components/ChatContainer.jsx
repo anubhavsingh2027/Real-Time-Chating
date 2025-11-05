@@ -33,7 +33,13 @@ function ChatContainer({ onBack }) {
   }, [selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
-    if (messageEndRef.current) {
+    // Only scroll on new messages, not on reactions
+    const lastMessage = messages[messages.length - 1];
+    const shouldScroll = lastMessage && 
+      (!lastMessage.reactions || lastMessage.reactions.length === 0) && 
+      lastMessage.createdAt > Date.now() - 1000; // Only for messages less than 1 second old
+
+    if (messageEndRef.current && shouldScroll) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
