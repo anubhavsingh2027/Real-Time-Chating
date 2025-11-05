@@ -118,7 +118,7 @@ function MessageInput() {
   };
 
   return (
-    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border-t border-gray-200 dark:border-slate-700 transition-all duration-300">
+    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border-t border-white/15 dark:border-white/10 transition-all duration-300">
 
       {/* Image Previews */}
       {imagePreviews.length > 0 && (
