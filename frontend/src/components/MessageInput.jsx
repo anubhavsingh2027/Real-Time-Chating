@@ -16,10 +16,16 @@ function MessageInput() {
     if (!text.trim() && imagePreviews.length === 0) return;
     if (isSoundEnabled) playRandomKeyStrokeSound();
 
+    // Store images to send and clear UI immediately
+    const imagesToSend = [...imagePreviews];
+    setText("");
+    setImagePreviews([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
     // If there are images, send them one by one
-    if (imagePreviews.length > 0) {
+    if (imagesToSend.length > 0) {
       const results = await Promise.allSettled(
-        imagePreviews.map(async (img) => {
+        imagesToSend.map(async (img) => {
           const maxSize = 10 * 1024 * 1024; // 10MB
           if (img.size > maxSize) {
             throw new Error(`${img.name} is too large (max 10MB)`);
@@ -51,10 +57,6 @@ function MessageInput() {
         image: null,
       });
     }
-
-    setText("");
-    setImagePreviews([]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleImageChange = async (e) => {
