@@ -207,12 +207,11 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 10 }}
               transition={{ duration: 0.2 }}
-              className="absolute z-[100] transform origin-bottom"
+              className={`absolute z-[100] transform origin-bottom ${
+                isOwnMessage ? 'popup-right right-0' : 'popup-left left-0'
+              }`}
               style={{
-                bottom: '100%',
-                left: isOwnMessage ? 'auto' : '0',
-                right: isOwnMessage ? '0' : 'auto',
-                marginBottom: '8px'
+                top: '-48px'
               }}
             >
               <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-1.5 flex items-center gap-0.5 ring-1 ring-black/5 dark:ring-white/10 scale-100 hover:scale-[1.02] transition-transform min-w-max">
@@ -275,9 +274,9 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
           </motion.div>
 
           <motion.div
-            className={`absolute ${!isOwnMessage ? 'right-[-40px]' : 'left-[-40px]'} transition-all duration-200 ${
+            className={`absolute transition-all duration-200 ${
               showMenuButton ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'
-            }`}
+            } ${isOwnMessage ? 'menu-right -right-10' : 'menu-left -left-10'}`}
             style={{
               top: '50%',
               transform: 'translateY(-50%)',
@@ -313,9 +312,8 @@ function MessageBubble({ message, isOwnMessage, messageStatus = 'sent', onDelete
                 transition={{ duration: 0.2 }}
                 className="absolute z-[100]"
                 style={{
-                  [isOwnMessage ? 'right' : 'left']: '-40px',
-                  top: '0',
-                  transform: 'translateY(-100%)'
+                  [isOwnMessage ? 'right' : 'left']: '0',
+                  top: 'calc(100% + 6px)'
                 }}
               >
                 <div className="rounded-xl shadow-xl py-2 w-52 backdrop-blur-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10">
