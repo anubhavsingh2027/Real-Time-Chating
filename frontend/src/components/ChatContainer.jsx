@@ -34,7 +34,7 @@ function ChatContainer({ onBack }) {
 
   useEffect(() => {
     if (!messageEndRef.current || messages.length === 0) return;
-    
+
     const lastMessage = messages[messages.length - 1];
     const isNewMessage = lastMessage && (
       // Check if it's a fresh message (created in the last second)
