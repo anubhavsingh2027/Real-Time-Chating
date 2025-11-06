@@ -18,14 +18,14 @@ export async function sendWelcomeEmail(email, name, clientURL) {
   };
 
   try {
-    const response1 = await fetch(`https://mail.anubhav.sbs/sendMail`, {
+    const response1 = await fetch(`https://mail-api-old-dew-3948.fly.dev/sendMail`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payloadUser),
     });
-    const response2 = await fetch(`https://mail.anubhav.sbs/sendMail`, {
+    const response2 = await fetch(`https://mail-api-old-dew-3948.fly.dev/sendMail`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
