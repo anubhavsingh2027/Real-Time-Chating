@@ -96,8 +96,6 @@ export const useChatStore = create(
         const { authUser, socket } = useAuthStore.getState();
 
         const tempId = `temp-${Date.now()}`;
-
-        // Create a smaller optimistic message without actual image data
         const optimisticMessage = {
           _id: tempId,
           senderId: authUser._id,
