@@ -10,11 +10,13 @@ export const axiosInstance = axios.create({
 });
 
 let accessToken = null;
+let refreshToken = null;
 
-export const setAccessToken = (token) => {
-  accessToken = token;
-  if (token) {
-    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+export const setTokens = (access, refresh) => {
+  accessToken = access;
+  refreshToken = refresh;
+  if (access) {
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${access}`;
   } else {
     delete axiosInstance.defaults.headers.common['Authorization'];
   }
@@ -23,11 +25,22 @@ export const setAccessToken = (token) => {
 // Refresh token function
 const refreshAccessToken = async () => {
   try {
+    if (!refreshToken) throw new Error('No refresh token available');
+    
     const response = await axios.post(`${BASE_URL}/auth/refresh`, {}, {
-      withCredentials: true
+      headers: { 'Authorization': `Bearer ${refreshToken}` }
     });
+    
+    // Update only the access token, keep the same refresh token
+    accessToken = response.data.accessToken;
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+    
     return response.data.accessToken;
   } catch (error) {
+    // Clear tokens on refresh failure
+    accessToken = null;
+    refreshToken = null;
+    delete axiosInstance.defaults.headers.common['Authorization'];
     throw error;
   }
 };

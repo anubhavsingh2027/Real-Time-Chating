@@ -4,13 +4,15 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [wasAuthenticated, setWasAuthenticated] = useState(false);
 
-  // Enhanced setAccessToken that tracks authentication state
-  const handleSetAccessToken = (token) => {
-    setAccessToken(token);
-    if (token) {
+  // Enhanced setTokens that tracks authentication state
+  const handleSetTokens = (access, refresh) => {
+    setAccessToken(access);
+    setRefreshToken(refresh);
+    if (access && refresh) {
       setWasAuthenticated(true);
     }
   };
@@ -29,6 +31,7 @@ export const AuthProvider = ({ children }) => {
 
   const clearAuth = () => {
     setAccessToken(null);
+    setRefreshToken(null);
     setWasAuthenticated(false);
     setShowLoginPrompt(false);
   };
@@ -36,7 +39,8 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       accessToken,
-      setAccessToken: handleSetAccessToken,
+      refreshToken,
+      setTokens: handleSetTokens,
       showLoginPrompt,
       setShowLoginPrompt,
       handleUnauthorized,

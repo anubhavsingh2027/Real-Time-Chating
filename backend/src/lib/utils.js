@@ -23,23 +23,11 @@ export const generateRefreshToken = (userId) => {
   });
 };
 
-export const setRefreshTokenCookie = (res, token) => {
-  // Set cookie with strict security settings but no domain
-  res.cookie("refreshToken", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
-};
-
-// For backward compatibility - will be used by existing code
-export const generateToken = (userId, res) => {
+// Generate both tokens without setting cookies
+export const generateTokens = (userId) => {
   const accessToken = generateAccessToken(userId);
   const refreshToken = generateRefreshToken(userId);
-  setRefreshTokenCookie(res, refreshToken);
-  return accessToken;
+  return { accessToken, refreshToken };
 };
 
 // http://localhost

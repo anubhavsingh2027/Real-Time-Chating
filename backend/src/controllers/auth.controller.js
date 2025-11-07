@@ -1,15 +1,13 @@
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
-import { generateAccessToken, generateRefreshToken, setRefreshTokenCookie } from "../lib/utils.js";
+import { generateTokens } from "../lib/utils.js";
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { ENV } from "../lib/env.js";
 import cloudinary from "../lib/cloudinary.js";
 
-const generateAuthTokens = (userId, res) => {
-  const accessToken = generateAccessToken(userId);
-  const refreshToken = generateRefreshToken(userId);
-  setRefreshTokenCookie(res, refreshToken);
-  return accessToken;
+const generateAuthTokens = (userId) => {
+  return generateTokens(userId);
 };
 
 export const signup = async (req, res) => {
@@ -49,13 +47,14 @@ export const signup = async (req, res) => {
       // await newUser.save();
 
       // after CR:
-      // Persist user first, then issue auth cookie
+      // Persist user first, then generate tokens
       const savedUser = await newUser.save();
-      const accessToken = generateAuthTokens(savedUser._id, res);
+      const { accessToken, refreshToken } = generateAuthTokens(savedUser._id);
 
       res.status(201).json({
         _id: newUser._id,
         accessToken,
+        refreshToken,
         fullName: newUser.fullName,
         email: newUser.email,
         profilePic: newUser.profilePic,
@@ -77,10 +76,22 @@ export const signup = async (req, res) => {
 
 export const refresh = async (req, res) => {
   try {
-    const accessToken = generateAccessToken(req.user._id);
+    if (!req.headers.authorization?.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'No refresh token provided' });
+    }
+
+    const refreshToken = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(refreshToken, ENV.JWT_SECRET);
+    
+    if (!decoded.userId) {
+      return res.status(401).json({ message: 'Invalid refresh token' });
+    }
+
+    const accessToken = generateAccessToken(decoded.userId);
     res.json({ accessToken });
   } catch (error) {
-    res.status(500).json({ message: "Error refreshing access token" });
+    console.error('Refresh token error:', error);
+    res.status(401).json({ message: "Invalid or expired refresh token" });
   }
 };
 
@@ -99,14 +110,15 @@ export const login = async (req, res) => {
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) return res.status(400).json({ message: "Invalid credentials" });
 
-    const accessToken = generateAuthTokens(user._id, res);
+    const { accessToken, refreshToken } = generateAuthTokens(user._id);
 
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
-      accessToken
+      accessToken,
+      refreshToken
     });
   } catch (error) {
 
