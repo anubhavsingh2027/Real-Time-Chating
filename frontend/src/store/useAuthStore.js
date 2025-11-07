@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { axiosInstance } from "../lib/axios";
+import { axiosInstance, setAccessToken } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
@@ -23,6 +23,7 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       console.log("Error in authCheck:", error);
       set({ authUser: null });
+      setAccessToken(null);
     } finally {
       set({ isCheckingAuth: false });
     }
@@ -32,7 +33,9 @@ export const useAuthStore = create((set, get) => ({
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
-      set({ authUser: res.data });
+      const { accessToken, ...userData } = res.data;
+      setAccessToken(accessToken);
+      set({ authUser: userData });
 
       toast.success("Account created successfully!");
       get().connectSocket();
@@ -47,7 +50,9 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post("/auth/login", data);
-      set({ authUser: res.data });
+      const { accessToken, ...userData } = res.data;
+      setAccessToken(accessToken);
+      set({ authUser: userData });
 
       toast.success("Logged in successfully");
 
@@ -62,6 +67,7 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
+      setAccessToken(null);
       set({ authUser: null });
       toast.success("Logged out successfully");
       get().disconnectSocket();
