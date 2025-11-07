@@ -7,10 +7,10 @@ It enables **instant, secure, and interactive communication** between users with
 
 ## 🚀 Live Demo
 
-🌍 **Website:** [https://real-time-chatting.anubhav.sbs/](https://real-time-chatting.anubhav.sbs/)
+🌍 **Website:** [https://real-time-chatting.nav-code.com/](https://real-time-chatting.nav-code.com/)
 
 🖼️ **Preview:**
-![App Preview](https://real-time-chatting.anubhav.sbs/websiteImg.png)
+![App Preview](https://real-time-chatting.nav-code.com/websiteImg.png)
 
 ---
 
@@ -87,7 +87,7 @@ This project demonstrates:
 ## 📬 Connect With Me
 
 👨‍💻 **Author:** Anubhav Singh
-🌐 **Portfolio:** [https://portfolio.anubhav.sbs/](https://portfolio.anubhav.sbs/)
+🌐 **Portfolio:** [https://anubhav.nav-code.com/](https://anubhav.nav-code.com/)
 
 🐙 **GitHub:** [https://github.com/anubhavsingh2027](https://github.com/anubhavsingh2027)
 
