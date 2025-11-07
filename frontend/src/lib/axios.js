@@ -56,8 +56,21 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Skip token refresh for login, signup, and refresh token endpoints
+    const skipRefreshFor = [
+      '/auth/login',
+      '/auth/signup',
+      '/auth/refresh',
+      '/auth/logout'
+    ];
+
     // If the error is 401 and we haven't already tried to refresh the token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // and the request is not for auth endpoints
+    if (
+      error.response?.status === 401 && 
+      !originalRequest._retry &&
+      !skipRefreshFor.some(path => originalRequest.url.includes(path))
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -66,9 +79,17 @@ axiosInstance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // If refresh token is also invalid, redirect to login
+        // Clear tokens and auth state
         setAccessToken(null);
-        window.location.href = '/login';
+        // Use the imported auth store to handle logout
+        const { useAuthStore } = await import('../store/useAuthStore');
+        const store = useAuthStore.getState();
+        store.clearAuth();
+        
+        // Only redirect to login if we're not already there
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
