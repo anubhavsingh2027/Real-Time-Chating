@@ -3,9 +3,9 @@ import { axiosInstance, setAccessToken } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const BASE_URL = import.meta.env.MODE === "development" ?
-"https://careful-jayme-psit-84f63ed1.koyeb.app" :
-"https://careful-jayme-psit-84f63ed1.koyeb.app";
+const BASE_URL = import.meta.env.MODE === "development"
+  ? "https://careful-jayme-psit-84f63ed1.koyeb.app"
+  : "https://careful-jayme-psit-84f63ed1.koyeb.app";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -22,10 +22,12 @@ export const useAuthStore = create((set, get) => ({
       get().connectSocket();
     } catch (error) {
       console.log("Error in authCheck:", error);
+      // Don't show error toast for initial auth check
       set({ authUser: null });
       setAccessToken(null);
     } finally {
-      set({ isCheckingAuth: false });
+      // Ensure we always set isCheckingAuth to false
+      setTimeout(() => set({ isCheckingAuth: false }), 1000);
     }
   },
 
@@ -40,7 +42,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Account created successfully!");
       get().connectSocket();
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Error during signup");
     } finally {
       set({ isSigningUp: false });
     }
@@ -55,10 +57,9 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: userData });
 
       toast.success("Logged in successfully");
-
       get().connectSocket();
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Error during login");
     } finally {
       set({ isLoggingIn: false });
     }
@@ -84,7 +85,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Profile updated successfully");
     } catch (error) {
       console.log("Error in update profile:", error);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Error updating profile");
     }
   },
 

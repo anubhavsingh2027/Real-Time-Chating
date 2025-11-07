@@ -6,11 +6,23 @@ import { Link } from "react-router-dom";
 
 function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
   const { login, isLoggingIn } = useAuthStore();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login(formData);
+    setError("");
+    
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+    
+    try {
+      await login(formData);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Unable to connect to server");
+    }
   };
 
   return (
