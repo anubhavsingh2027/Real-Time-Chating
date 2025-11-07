@@ -14,41 +14,8 @@ const __dirname = path.resolve();
 const PORT = ENV.PORT || 3000;
 
 app.use(express.json({ limit: "50mb" })); // req.body
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
-
-// CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests from our frontend origins and no origin (like mobile apps)
-    const allowedOrigins = [ENV.CLIENT_URL];
-    if (ENV.NODE_ENV === 'development') {
-      allowedOrigins.push('http://localhost:5173', 'http://localhost:3000');
-    }
-    
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Set-Cookie'],
-};
-
-app.use(cors(corsOptions));
-
-// Additional security headers
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true');
-  // Only set Access-Control-Allow-Origin if origin is allowed
-  const origin = req.headers.origin;
-  if (origin && corsOptions.origin(origin, (err, allowed) => allowed)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-  next();
-});
 
 //==Server Starting
 

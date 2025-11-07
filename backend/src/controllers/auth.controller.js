@@ -1,14 +1,9 @@
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
-import { generateTokens } from "../lib/utils.js";
-import jwt from "jsonwebtoken";
+import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { ENV } from "../lib/env.js";
 import cloudinary from "../lib/cloudinary.js";
-
-const generateAuthTokens = (userId) => {
-  return generateTokens(userId);
-};
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -47,14 +42,12 @@ export const signup = async (req, res) => {
       // await newUser.save();
 
       // after CR:
-      // Persist user first, then generate tokens
+      // Persist user first, then issue auth cookie
       const savedUser = await newUser.save();
-      const { accessToken, refreshToken } = generateAuthTokens(savedUser._id);
+      generateToken(savedUser._id, res);
 
       res.status(201).json({
         _id: newUser._id,
-        accessToken,
-        refreshToken,
         fullName: newUser.fullName,
         email: newUser.email,
         profilePic: newUser.profilePic,
@@ -74,27 +67,6 @@ export const signup = async (req, res) => {
   }
 };
 
-export const refresh = async (req, res) => {
-  try {
-    if (!req.headers.authorization?.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No refresh token provided' });
-    }
-
-    const refreshToken = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(refreshToken, ENV.JWT_SECRET);
-    
-    if (!decoded.userId) {
-      return res.status(401).json({ message: 'Invalid refresh token' });
-    }
-
-    const accessToken = generateAccessToken(decoded.userId);
-    res.json({ accessToken });
-  } catch (error) {
-    console.error('Refresh token error:', error);
-    res.status(401).json({ message: "Invalid or expired refresh token" });
-  }
-};
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -110,15 +82,13 @@ export const login = async (req, res) => {
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) return res.status(400).json({ message: "Invalid credentials" });
 
-    const { accessToken, refreshToken } = generateAuthTokens(user._id);
+    generateToken(user._id, res);
 
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
-      accessToken,
-      refreshToken
     });
   } catch (error) {
 
@@ -127,14 +97,7 @@ export const login = async (req, res) => {
 };
 
 export const logout = (_, res) => {
-  // Clear the refresh token cookie
-  res.cookie("refreshToken", "", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    path: "/",
-    maxAge: 0
-  });
+  res.cookie("jwt", "", { maxAge: 0 });
   res.status(200).json({ message: "Logged out successfully" });
 };
 
