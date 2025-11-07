@@ -7,15 +7,10 @@ const BASE_URL = import.meta.env.MODE === "development"
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
-  timeout: 10000, // 10 second timeout
-  headers: {
-    'Content-Type': 'application/json'
-  }
 });
 
 let accessToken = null;
 
-// Function to set the access token
 export const setAccessToken = (token) => {
   accessToken = token;
   if (token) {
@@ -25,7 +20,7 @@ export const setAccessToken = (token) => {
   }
 };
 
-// Function to get a new access token using the refresh token
+// Refresh token function
 const refreshAccessToken = async () => {
   try {
     const response = await axios.post(`${BASE_URL}/auth/refresh`, {}, {
@@ -37,7 +32,7 @@ const refreshAccessToken = async () => {
   }
 };
 
-// Add a request interceptor
+// Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
     if (accessToken) {
@@ -45,32 +40,17 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Add a response interceptor
+// Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Skip token refresh for login, signup, and refresh token endpoints
-    const skipRefreshFor = [
-      '/auth/login',
-      '/auth/signup',
-      '/auth/refresh',
-      '/auth/logout'
-    ];
-
     // If the error is 401 and we haven't already tried to refresh the token
-    // and the request is not for auth endpoints
-    if (
-      error.response?.status === 401 && 
-      !originalRequest._retry &&
-      !skipRefreshFor.some(path => originalRequest.url.includes(path))
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
@@ -79,14 +59,8 @@ axiosInstance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Clear tokens and auth state
+        // If refresh token is invalid, redirect to login
         setAccessToken(null);
-        // Use the imported auth store to handle logout
-        const { useAuthStore } = await import('../store/useAuthStore');
-        const store = useAuthStore.getState();
-        store.clearAuth();
-        
-        // Only redirect to login if we're not already there
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
         }

@@ -2,20 +2,24 @@ import jwt from "jsonwebtoken";
 import { ENV } from "./env.js";
 
 export const generateAccessToken = (userId) => {
-  if (!ENV.JWT_SECRET) {
+  const { JWT_SECRET } = ENV;
+  if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not configured");
   }
-  return jwt.sign({ userId }, ENV.JWT_SECRET, {
-    expiresIn: "15m", // short lived access token
+
+  return jwt.sign({ userId }, JWT_SECRET, {
+    expiresIn: "15m", // Short-lived access token
   });
 };
 
 export const generateRefreshToken = (userId) => {
-  if (!ENV.JWT_REFRESH_SECRET) {
-    throw new Error("JWT_REFRESH_SECRET is not configured");
+  const { JWT_SECRET } = ENV;
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET is not configured");
   }
-  return jwt.sign({ userId }, ENV.JWT_REFRESH_SECRET, {
-    expiresIn: "7d",
+
+  return jwt.sign({ userId }, JWT_SECRET, {
+    expiresIn: "7d", // Long-lived refresh token
   });
 };
 
@@ -29,12 +33,13 @@ export const setRefreshTokenCookie = (res, token) => {
   });
 };
 
-export const clearRefreshTokenCookie = (res) => {
-  res.cookie("refreshToken", "", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    path: "/",
-    maxAge: 0,
-  });
+// For backward compatibility - will be used by existing code
+export const generateToken = (userId, res) => {
+  const accessToken = generateAccessToken(userId);
+  const refreshToken = generateRefreshToken(userId);
+  setRefreshTokenCookie(res, refreshToken);
+  return accessToken;
 };
+
+// http://localhost
+// https://dsmakmk.com
