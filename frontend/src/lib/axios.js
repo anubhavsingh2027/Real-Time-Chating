@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL = import.meta.env.MODE === "development"
-  ? "https://careful-jayme-psit-84f63ed1.koyeb.app/api"
+  ? "http://localhost:3000/api"
   : "https://careful-jayme-psit-84f63ed1.koyeb.app/api";
 
 export const axiosInstance = axios.create({
@@ -35,9 +35,14 @@ const refreshAccessToken = async () => {
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Ensure credentials are always sent
+    config.withCredentials = true;
+    
+    // Add authorization header if we have an access token
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+    
     return config;
   },
   (error) => Promise.reject(error)

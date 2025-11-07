@@ -24,6 +24,7 @@ export const generateRefreshToken = (userId) => {
 };
 
 export const setRefreshTokenCookie = (res, token) => {
+  // Set cookie with strict security settings but no domain
   res.cookie("refreshToken", token, {
     httpOnly: true,
     secure: true,
