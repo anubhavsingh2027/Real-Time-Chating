@@ -43,6 +43,12 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let handleUnauthorizedCallback = () => {};
+
+export const setUnauthorizedCallback = (callback) => {
+  handleUnauthorizedCallback = callback;
+};
+
 // Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -59,11 +65,9 @@ axiosInstance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // If refresh token is invalid, redirect to login
+        // Clear token and trigger unauthorized handler
         setAccessToken(null);
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
+        handleUnauthorizedCallback();
         return Promise.reject(refreshError);
       }
     }
