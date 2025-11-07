@@ -50,9 +50,20 @@ function AppContent() {
             <p className="text-gray-600 dark:text-gray-300 mb-4">
               Your session has expired. Please log in again to continue.
             </p>
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowLoginPrompt(false)}
+                className="text-gray-600 dark:text-gray-300 px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLoginPrompt(false);
+                  // Navigate programmatically to avoid the infinite loop
+                  window.history.pushState({}, '', '/login');
+                  window.location.reload();
+                }}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
               >
                 Log In

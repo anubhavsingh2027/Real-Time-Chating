@@ -49,14 +49,26 @@ export const setUnauthorizedCallback = (callback) => {
   handleUnauthorizedCallback = callback;
 };
 
+// List of endpoints that should not trigger the unauthorized modal
+const AUTH_ENDPOINTS = [
+  '/auth/login',
+  '/auth/signup',
+  '/auth/refresh',
+  '/auth/logout'
+];
+
 // Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    
+    // Extract the endpoint path from the full URL
+    const requestPath = originalRequest.url.replace(BASE_URL, '');
+    const isAuthEndpoint = AUTH_ENDPOINTS.some(endpoint => requestPath.includes(endpoint));
 
-    // If the error is 401 and we haven't already tried to refresh the token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // If 401 error, not an auth endpoint, and haven't tried refresh yet
+    if (error.response?.status === 401 && !isAuthEndpoint && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
@@ -65,9 +77,11 @@ axiosInstance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Clear token and trigger unauthorized handler
+        // Only trigger unauthorized handler for non-auth endpoints
         setAccessToken(null);
-        handleUnauthorizedCallback();
+        if (!isAuthEndpoint) {
+          handleUnauthorizedCallback();
+        }
         return Promise.reject(refreshError);
       }
     }
